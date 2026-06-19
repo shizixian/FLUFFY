@@ -23,6 +23,13 @@
 ## 下载
 
 - [下载 APK v0.1.0](https://github.com/shizixian/FLUFFY/releases/tag/v0.1.0) — 手机直接安装即可
+
+## 截图
+
+| 主菜单 | 游戏画面 |
+|:---:|:---:|
+| ![](screenshot_menu.png) | ![](screenshot_game.png) |
+
 - 项目完全开源
 
 ## 开发
