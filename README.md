@@ -40,11 +40,6 @@
 
 用 Godot 4.6.3 打开项目，F5 运行。
 
-### 导出 Android
-
-1. 安装 Android SDK + Java 21
-2. 项目 → 导出 → 选择 Android 预设 → 导出 AAB
-
 ## 致谢
 
 - 作者：ShiZixian (Zan)
