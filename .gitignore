@@ -1,0 +1,21 @@
+# Godot-specific ignores
+.godot/
+android/
+ios/
+export_presets.cfg
+
+# Generated files
+*.aab
+*.apk
+
+# Keystore (contains private key!)
+release.keystore
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+*.iml
+.idea/
+.vscode/
