@@ -83,24 +83,19 @@ var settings_vol_slider: HSlider
 var pause_bgm_check: CheckBox
 var settings_bgm_check: CheckBox
 
-# Splash screen
-var splash_layer: CanvasLayer
-var splash_dismissed := false
-
 # Player profile and progress
 var player_name := ""
 var player_avatar := 0  # 0-5 corresponding to icon_textures
 var max_level := 1
 var total_score := 0
 var selected_avatar_for_profile := 0
+var safe_left_margin := 50  # adjusted for camera cutouts on mobile
+var _safe_area_detected := false
 
 func _ready() -> void:
 	shuffle_button.pressed.connect(_on_shuffle_pressed)
 	restart_button.pressed.connect(_on_restart_pressed)
 	next_button.pressed.connect(_on_next_level)
-
-	# Make sure board area receives input
-	board_node.set_process_input(true)
 
 	# Load cover (AI generated)
 	cover_texture = load("res://assets/cover.jpg")
@@ -129,12 +124,22 @@ func _ready() -> void:
 
 	# Start BGM if enabled
 	if bgm_player and bgm_player.stream and bgm_enabled:
+		bgm_player.volume_db = linear_to_db(bgm_volume)
 		bgm_player.play()
 
-	# Initial state — hide game UI, show splash first
+	# Initial state — hide game UI, show main menu directly
 	_hide_game_ui()
-	main_menu.visible = false
-	_show_splash_screen()
+
+	# Defer cutout detection to avoid blocking _ready
+	_safe_area_detected = false
+	call_deferred("_detect_safe_area")
+	if player_name == "":
+		main_menu.visible = true
+		show_profile_creation()
+	else:
+		show_main_menu()
+		pause_menu.visible = false
+		pause_button.visible = false
 
 func _process(delta: float) -> void:
 	if timer_running and not paused:
@@ -220,42 +225,71 @@ func render_cards() -> void:
 		var c = cards[i]
 		if c.type == -1:
 			continue
-		var node = create_tile_node(c.type)
-		# Position based on fixed gx gy layer - this keeps the board layout (行数/span) constant
-		var pos_x = 90 + c.gx * 85 + (c.gy % 2) * 25
-		var pos_y = 180 + c.gy * 68 - c.layer * 20
+		var node = create_tile_node(c.type, i)
+		# Position based on fixed gx gy layer
+		var pos_x = 25 + c.gx * 104 + (c.gy % 2) * 24
+		var pos_y = 110 + c.gy * 82 - c.layer * 22
 		node.position = Vector2(pos_x, pos_y)
 		board_node.add_child(node)
 		c.node = node
 
-func create_tile_node(type_idx: int) -> Node2D:
+func create_tile_node(type_idx: int, card_idx: int) -> Node2D:
 	var node = Node2D.new()
 
-	# 直接用图片作为图标。
-	# 黄色选中框（SelBorder）现在和图片完全一样的大小和位置（正中间对齐）。
-	# 图片放在后面（覆盖在黄色框上面）。
-	# 选中时黄色框会显示在图片后边作为高亮（如果图片有透明区域会看到黄色围绕效果）。
-	var icon_size := 32
-	var icon_pos := Vector2(-icon_size / 2.0, -icon_size / 2.0)
+	var icon_size := 72
+	var half := icon_size / 2.0
 
+	# Selection border (behind the button)
 	var sel_border = ColorRect.new()
 	sel_border.name = "SelBorder"
 	sel_border.size = Vector2(icon_size, icon_size)
-	sel_border.color = Color(1, 0.85, 0, 0)  # 默认透明（不可见）
-	sel_border.position = icon_pos
+	sel_border.color = Color(1, 0.85, 0, 0)
+	sel_border.position = Vector2(-half, -half)
+	sel_border.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	node.add_child(sel_border)
 
-	# 图片直接作为图标，覆盖在黄色选中框上
-	var icon = TextureRect.new()
+	# Use a BUTTON for each card — native touch handling, works 100% on mobile.
+	# Flat style = no visible button chrome, just the icon.
+	var btn := Button.new()
+	btn.name = "CardBtn"
+	btn.size = Vector2(icon_size + 14, icon_size + 14)
+	btn.position = Vector2(-half - 7, -half - 7)
+	btn.flat = true
+	btn.focus_mode = Control.FOCUS_NONE
+	# Make button invisible — show only the icon inside
+	var empty_style := StyleBoxEmpty.new()
+	btn.add_theme_stylebox_override("normal", empty_style)
+	btn.add_theme_stylebox_override("hover", empty_style)
+	btn.add_theme_stylebox_override("pressed", empty_style)
+	btn.add_theme_stylebox_override("focus", empty_style)
+	btn.pressed.connect(_on_card_button_pressed.bind(card_idx))
+	node.add_child(btn)
+
+	# Icon on top of button (mouse_filter=IGNORE so touches pass to button)
+	var icon := TextureRect.new()
 	icon.name = "Icon"
 	icon.texture = icon_textures[type_idx]
 	icon.size = Vector2(icon_size, icon_size)
-	icon.position = icon_pos
+	icon.position = Vector2(-half, -half)
 	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	node.add_child(icon)
 
 	return node
 
+func _on_card_button_pressed(card_idx: int) -> void:
+	if not is_card_free(card_idx):
+		return
+	# Brief visual feedback — flash the button
+	var c = cards[card_idx]
+	if c.node:
+		var btn = c.node.get_node_or_null("CardBtn") as Button
+		if btn:
+			btn.modulate = Color(1.3, 1.3, 0.6)
+			await get_tree().create_timer(0.08).timeout
+			if is_instance_valid(btn):
+				btn.modulate = Color(1, 1, 1)
+	handle_tile_click(card_idx)
 
 
 func handle_tile_click(card_idx: int) -> void:
@@ -329,7 +363,7 @@ func highlight_tile(tile_node: Node, on: bool) -> void:
 		return
 	if on:
 		tile_node.modulate = Color(1.15, 1.15, 0.9)
-		tile_node.scale = Vector2(1.08, 1.08)
+		tile_node.scale = Vector2(1.06, 1.06)
 		# Yellow surround around the card border
 		var border = tile_node.get_node_or_null("SelBorder")
 		if border:
@@ -661,36 +695,8 @@ func show_win() -> void:
 	print("Level %d cleared! Score: %d, Time: %s, Stars: %d" % [level, score, time_str, stars])
 
 func _input(event: InputEvent) -> void:
-	# Manual click on cards. We test all, collect candidates under mouse, pick highest layer that is "free" (classic FLUFFY羊羊乐 rule: exposed + side clear).
-	# This allows selecting "behind" tiles if they are exposed on side, even if same type is "behind" in line.
-	if (event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT) or \
-	   (event is InputEventScreenTouch and event.pressed):
-		var mouse_pos = get_global_mouse_position()
-
-		var candidates = []
-		for i in range(cards.size()):
-			var c = cards[i]
-			if c.type == -1 or not c.node or not is_instance_valid(c.node):
-				continue
-			# Use the actual picture's (Icon) global rect for hit detection.
-			# Grow the rect slightly so edges of the image are easier to click.
-			# Only consider if the click is on its rect AND the card is free.
-			var icon = c.node.get_node_or_null("Icon") as TextureRect
-			if icon:
-				var rect = icon.get_global_rect().grow(3)  # 3px extra margin for easier selection
-				if rect.has_point(mouse_pos) and is_card_free(i):
-					candidates.append(i)
-
-		if candidates.size() > 0:
-			# Among free cards whose (grown) rect contains the mouse, prefer the one with highest layer.
-			# Highest layer = the one that is "on top" at its position.
-			# This ensures that if a visually exposed high-layer tile is under the cursor, it gets selected.
-			candidates.sort_custom(func(a, b): return cards[a].layer > cards[b].layer)
-			var best_idx = candidates[0]
-			handle_tile_click(best_idx)
-			return
-
-	# Optional global input, e.g. for testing
+	# Card touch handled by Button.pressed signals (see _on_card_button_pressed).
+	# Only global shortcuts here.
 	if event.is_action_pressed("ui_cancel"):
 		_on_restart_pressed()
 
@@ -699,8 +705,8 @@ func _input(event: InputEvent) -> void:
 func _setup_pause_button():
 	pause_button = Button.new()
 	pause_button.text = "暂停"
-	pause_button.position = Vector2(620, 20)
-	pause_button.size = Vector2(80, 40)
+	pause_button.position = Vector2(580, 20)
+	pause_button.size = Vector2(120, 60)
 	pause_button.pressed.connect(_on_pause_pressed)
 	$UI.add_child(pause_button)
 
@@ -715,11 +721,21 @@ func _setup_pause_menu():
 	bg.mouse_filter = Control.MOUSE_FILTER_STOP
 	pause_menu.add_child(bg)
 
-	# Centered panel
+	# Centered rounded panel
 	var panel = Panel.new()
-	panel.size = Vector2(400, 430)
-	panel.position = Vector2(160, 320)
+	panel.size = Vector2(520, 500)
+	# Center horizontally on 720px screen: (720-520)/2 = 100
+	# Center vertically: (1280-500)/2 = 390
+	panel.position = Vector2(100, 390)
 	panel.mouse_filter = Control.MOUSE_FILTER_STOP
+	# Round corners
+	var panel_style = StyleBoxFlat.new()
+	panel_style.bg_color = Color(0.18, 0.2, 0.25, 0.95)
+	panel_style.corner_radius_top_left = 24
+	panel_style.corner_radius_top_right = 24
+	panel_style.corner_radius_bottom_left = 24
+	panel_style.corner_radius_bottom_right = 24
+	panel.add_theme_stylebox_override("panel", panel_style)
 	pause_menu.add_child(panel)
 
 	# Title
@@ -727,29 +743,35 @@ func _setup_pause_menu():
 	title.text = "游戏暂停"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.position = Vector2(0, 30)
-	title.size = Vector2(400, 50)
+	title.size = Vector2(520, 50)
+	title.add_theme_font_size_override("font_size", 36)
+	title.add_theme_color_override("font_color", Color(1, 1, 1))
 	panel.add_child(title)
 
 	# Resume button
 	var resume = Button.new()
 	resume.text = "继续游戏"
-	resume.position = Vector2(100, 100)
-	resume.size = Vector2(200, 50)
+	resume.position = Vector2(110, 100)
+	resume.size = Vector2(300, 70)
+	_make_rounded_button(resume, Color(0.3, 0.7, 0.4))
 	resume.pressed.connect(_on_resume_pressed)
 	panel.add_child(resume)
 
 	# Exit to main menu
 	var exit_btn = Button.new()
 	exit_btn.text = "退出至主页"
-	exit_btn.position = Vector2(100, 170)
-	exit_btn.size = Vector2(200, 50)
+	exit_btn.position = Vector2(110, 190)
+	exit_btn.size = Vector2(300, 70)
+	_make_rounded_button(exit_btn, Color(0.8, 0.3, 0.3))
 	exit_btn.pressed.connect(_on_exit_to_main_pressed)
 	panel.add_child(exit_btn)
 
 	# Volume control
 	var vol_label = Label.new()
 	vol_label.text = "背景音乐音量"
-	vol_label.position = Vector2(50, 240)
+	vol_label.position = Vector2(50, 280)
+	vol_label.add_theme_font_size_override("font_size", 18)
+	vol_label.add_theme_color_override("font_color", Color(0.9, 0.9, 0.9))
 	panel.add_child(vol_label)
 
 	var vol_slider = HSlider.new()
@@ -757,8 +779,8 @@ func _setup_pause_menu():
 	vol_slider.max_value = 1
 	vol_slider.step = 0.01
 	vol_slider.value = bgm_volume
-	vol_slider.position = Vector2(50, 270)
-	vol_slider.size = Vector2(300, 30)
+	vol_slider.position = Vector2(50, 310)
+	vol_slider.size = Vector2(420, 30)
 	vol_slider.value_changed.connect(_on_volume_changed)
 	panel.add_child(vol_slider)
 	pause_vol_slider = vol_slider
@@ -766,8 +788,10 @@ func _setup_pause_menu():
 	# BGM on/off checkbox
 	var bgm_check = CheckBox.new()
 	bgm_check.text = "开启背景音乐"
-	bgm_check.position = Vector2(50, 320)
+	bgm_check.position = Vector2(50, 360)
 	bgm_check.button_pressed = bgm_enabled
+	bgm_check.add_theme_font_size_override("font_size", 18)
+	bgm_check.add_theme_color_override("font_color", Color(0.9, 0.9, 0.9))
 	bgm_check.toggled.connect(_on_bgm_toggled)
 	panel.add_child(bgm_check)
 	pause_bgm_check = bgm_check
@@ -795,8 +819,8 @@ func _setup_main_menu():
 	# Start button - rounded
 	var start = Button.new()
 	start.text = "开始游戏"
-	start.position = Vector2(260, 1000)
-	start.size = Vector2(200, 60)
+	start.position = Vector2(160, 980)
+	start.size = Vector2(400, 90)
 	start.pressed.connect(_on_start_game_pressed)
 	_make_rounded_button(start, Color(0.3, 0.7, 0.4))
 	main_menu.add_child(start)
@@ -804,8 +828,8 @@ func _setup_main_menu():
 	# Quit button - rounded
 	var quit = Button.new()
 	quit.text = "退出游戏"
-	quit.position = Vector2(260, 1080)
-	quit.size = Vector2(200, 50)
+	quit.position = Vector2(160, 1090)
+	quit.size = Vector2(400, 75)
 	quit.pressed.connect(func(): get_tree().quit())
 	_make_rounded_button(quit, Color(0.8, 0.3, 0.3))
 	main_menu.add_child(quit)
@@ -813,23 +837,23 @@ func _setup_main_menu():
 	# Settings button on main menu
 	var settings_btn = Button.new()
 	settings_btn.text = "设置"
-	settings_btn.position = Vector2(260, 1160)
-	settings_btn.size = Vector2(200, 50)
+	settings_btn.position = Vector2(160, 1180)
+	settings_btn.size = Vector2(400, 75)
 	settings_btn.pressed.connect(_on_settings_pressed)
 	_make_rounded_button(settings_btn, Color(0.4, 0.6, 0.8))
 	main_menu.add_child(settings_btn)
 
 	# Bottom right: Yellow ! about icon + "关于"
 	var about_container = Control.new()
-	about_container.size = Vector2(70, 55)
-	about_container.position = Vector2(640, 1220)  # bottom right for 720x1280, slightly adjusted
+	about_container.size = Vector2(70, 65)
+	about_container.position = Vector2(640, 1200)  # bottom right for 720x1280, slightly adjusted
 	main_menu.add_child(about_container)
 
 	# Yellow exclamation icon button for 关于
 	var about_btn = Button.new()
 	about_btn.text = "❗"
-	about_btn.size = Vector2(36, 36)
-	about_btn.position = Vector2(17, 0)
+	about_btn.size = Vector2(50, 50)
+	about_btn.position = Vector2(10, 0)
 	var yellow_style = StyleBoxFlat.new()
 	yellow_style.bg_color = Color(1, 0.85, 0)
 	yellow_style.corner_radius_top_left = 18
@@ -945,7 +969,7 @@ func _setup_timer_label():
 	timer_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	timer_label.position = Vector2(260, 80)
 	timer_label.size = Vector2(200, 40)
-	timer_label.add_theme_font_size_override("font_size", 26)
+	timer_label.add_theme_font_size_override("font_size", 34)
 	timer_label.add_theme_color_override("font_color", Color(0.3, 0.3, 0.3))
 	$UI.add_child(timer_label)
 
@@ -953,301 +977,51 @@ func _on_about_pressed():
 	about_dialog.popup_centered()
 
 
-# ═══════════════════════════════════════════════
-#  Splash Screen — 健康游戏忠告开屏
-# ═══════════════════════════════════════════════
 
-func _show_splash_screen():
-	splash_dismissed = false
-	splash_layer = CanvasLayer.new()
-	splash_layer.layer = 100
-
-	# Root container — we fade this Control (not the CanvasLayer, which has no modulate)
-	var root = Control.new()
-	root.set_anchors_preset(Control.PRESET_FULL_RECT)
-	splash_layer.add_child(root)
-
-	# Full-screen dark background (deep blue-black)
-	var bg = ColorRect.new()
-	bg.color = Color(0.06, 0.08, 0.16, 1)
-	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
-	root.add_child(bg)
-
-	# ── Penguin Logo (centered) ──
-	var penguin = _create_penguin_logo()
-	penguin.position = Vector2(280, 80)
-	root.add_child(penguin)
-
-	# ── "XIAN Game" brand name ──
-	var brand = Label.new()
-	brand.text = "XIAN Game"
-	brand.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	brand.position = Vector2(0, 300)
-	brand.size = Vector2(720, 50)
-	brand.add_theme_font_size_override("font_size", 36)
-	brand.add_theme_color_override("font_color", Color(0.2, 0.55, 0.9))
-	root.add_child(brand)
-
-	# Subtitle
-	var subtitle = Label.new()
-	subtitle.text = "经典休闲配对消除"
-	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	subtitle.position = Vector2(0, 348)
-	subtitle.size = Vector2(720, 30)
-	subtitle.add_theme_font_size_override("font_size", 16)
-	subtitle.add_theme_color_override("font_color", Color(0.65, 0.7, 0.78))
-	root.add_child(subtitle)
-
-	# ── Health notice panel (bottom area) ──
-	var notice_panel = Panel.new()
-	notice_panel.size = Vector2(560, 330)
-	notice_panel.position = Vector2(80, 500)
-	root.add_child(notice_panel)
-
-	# Notice title
-	var notice_title = Label.new()
-	notice_title.text = "健康游戏忠告"
-	notice_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	notice_title.position = Vector2(0, 16)
-	notice_title.size = Vector2(560, 36)
-	notice_title.add_theme_font_size_override("font_size", 24)
-	notice_title.add_theme_color_override("font_color", Color(0.18, 0.22, 0.3))
-	notice_panel.add_child(notice_title)
-
-	# Separator line
-	var sep = ColorRect.new()
-	sep.color = Color(0.65, 0.65, 0.7, 0.45)
-	sep.position = Vector2(40, 56)
-	sep.size = Vector2(480, 1)
-	notice_panel.add_child(sep)
-
-	# Health notice lines — the official Chinese game health advisory
-	var notice_lines = [
-		"抵制不良游戏，拒绝盗版游戏。",
-		"注意自我保护，谨防受骗上当。",
-		"适度游戏益脑，沉迷游戏伤身。",
-		"合理安排时间，享受健康生活。",
-	]
-	for i in range(notice_lines.size()):
-		var line = Label.new()
-		line.text = notice_lines[i]
-		line.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		line.position = Vector2(0, 78 + i * 48)
-		line.size = Vector2(560, 40)
-		line.add_theme_font_size_override("font_size", 18)
-		line.add_theme_color_override("font_color", Color(0.25, 0.28, 0.35))
-		notice_panel.add_child(line)
-
-	# Copyright inside panel
-	var copyright = Label.new()
-	copyright.text = "© 2026 ShiZixian (Zan)"
-	copyright.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	copyright.position = Vector2(0, 288)
-	copyright.size = Vector2(560, 28)
-	copyright.add_theme_font_size_override("font_size", 11)
-	copyright.add_theme_color_override("font_color", Color(0.5, 0.52, 0.58))
-	notice_panel.add_child(copyright)
-
-	# Tap to continue hint (pulsing, below notice)
-	var tap_hint = Label.new()
-	tap_hint.name = "TapHint"
-	tap_hint.text = "— 点击任意处继续 —"
-	tap_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	tap_hint.position = Vector2(0, 920)
-	tap_hint.size = Vector2(720, 40)
-	tap_hint.add_theme_font_size_override("font_size", 16)
-	tap_hint.add_theme_color_override("font_color", Color(0.5, 0.58, 0.68))
-	root.add_child(tap_hint)
-
-	# Version number
-	var version_label = Label.new()
-	version_label.text = "v0.1.0"
-	version_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	version_label.position = Vector2(0, 970)
-	version_label.size = Vector2(720, 28)
-	version_label.add_theme_font_size_override("font_size", 11)
-	version_label.add_theme_color_override("font_color", Color(0.3, 0.35, 0.45))
-	root.add_child(version_label)
-
-	# Fade-in animation — fade the root Control, not the CanvasLayer
-	root.modulate.a = 0.0
-	var tween = create_tween()
-	tween.tween_property(root, "modulate:a", 1.0, 0.8)
-
-	add_child(splash_layer)
-
-	# Transparent full-screen tap area (on top of everything, catches taps to dismiss)
-	var tap_area = ColorRect.new()
-	tap_area.color = Color(0, 0, 0, 0)
-	tap_area.set_anchors_preset(Control.PRESET_FULL_RECT)
-	tap_area.mouse_filter = Control.MOUSE_FILTER_STOP
-	tap_area.gui_input.connect(_on_splash_input)
-	root.add_child(tap_area)
-
-	# Auto-dismiss after 5 seconds
-	var auto_timer = get_tree().create_timer(5.0)
-	auto_timer.timeout.connect(_dismiss_splash)
-
-	# Start pulsing the tap hint
-	_pulse_tap_hint()
-
-
-# ── Penguin Logo Builder ──
-# Creates a cute front-facing blue penguin using Panel + StyleBoxFlat shapes
-func _create_penguin_logo() -> Control:
-	var c = Control.new()
-	c.size = Vector2(160, 210)
-
-	var dark_blue = Color(0.09, 0.28, 0.5)    # body color
-	var med_blue = Color(0.12, 0.38, 0.65)     # head color
-	var wing_blue = Color(0.07, 0.22, 0.4)     # wing/flipper color
-	var white = Color(0.96, 0.97, 1.0)         # belly / eye whites
-	var black = Color(0.08, 0.09, 0.12)        # pupils
-	var orange = Color(1.0, 0.52, 0.08)        # beak & feet
-	var shine = Color(1.0, 1.0, 1.0, 0.9)      # eye shine
-
-	# Left wing
-	c.add_child(_make_rounded(20, 65, wing_blue, Vector2(6, 55), 10))
-	# Right wing
-	c.add_child(_make_rounded(20, 65, wing_blue, Vector2(134, 55), 10))
-
-	# Body (big rounded oval)
-	c.add_child(_make_rounded(100, 120, dark_blue, Vector2(30, 55), 50))
-
-	# Belly (white oval inside body)
-	c.add_child(_make_rounded(48, 70, white, Vector2(56, 88), 24))
-
-	# Head (slightly lighter blue, overlaps body top)
-	c.add_child(_make_rounded(70, 65, med_blue, Vector2(45, 5), 35))
-
-	# Left eye
-	c.add_child(_make_rounded(16, 16, white, Vector2(53, 22), 8))
-	# Right eye
-	c.add_child(_make_rounded(16, 16, white, Vector2(91, 22), 8))
-
-	# Left pupil
-	c.add_child(_make_rounded(7, 7, black, Vector2(58, 27), 4))
-	# Right pupil
-	c.add_child(_make_rounded(7, 7, black, Vector2(96, 27), 4))
-
-	# Eye shine (tiny white dot on pupils for cuteness)
-	c.add_child(_make_rounded(3, 3, shine, Vector2(59, 28), 2))
-	c.add_child(_make_rounded(3, 3, shine, Vector2(97, 28), 2))
-
-	# Beak (small orange oval, centered below eyes)
-	c.add_child(_make_rounded(22, 12, orange, Vector2(69, 38), 6))
-
-	# Left foot
-	c.add_child(_make_rounded(28, 14, orange, Vector2(38, 178), 7))
-	# Right foot
-	c.add_child(_make_rounded(28, 14, orange, Vector2(94, 178), 7))
-
-	return c
-
-
-# Helper: create a rounded Panel (circle if w==h, oval if not)
-func _make_rounded(w: float, h: float, color: Color, pos: Vector2, radius: float) -> Panel:
-	var p = Panel.new()
-	p.size = Vector2(w, h)
-	p.position = pos
-	var s = StyleBoxFlat.new()
-	s.bg_color = color
-	s.corner_radius_top_left = int(radius)
-	s.corner_radius_top_right = int(radius)
-	s.corner_radius_bottom_left = int(radius)
-	s.corner_radius_bottom_right = int(radius)
-	p.add_theme_stylebox_override("panel", s)
-	return p
-
-
-func _pulse_tap_hint():
-	if splash_dismissed or splash_layer == null:
+func _detect_safe_area() -> void:
+	var ss := DisplayServer.screen_get_size()
+	if ss.x <= 0:
 		return
-	# TapHint is a grandchild: splash_layer → root → TapHint
-	var hint: Label = null
-	var root = splash_layer.get_child(0) if splash_layer.get_child_count() > 0 else null
-	if root:
-		hint = root.get_node_or_null("TapHint") as Label
-	if hint:
-		var tween = create_tween()
-		tween.tween_property(hint, "modulate:a", 0.3, 1.2)
-		tween.tween_property(hint, "modulate:a", 1.0, 1.2)
-		tween.tween_callback(_pulse_tap_hint)
-
-
-func _on_splash_input(event: InputEvent):
-	if splash_dismissed:
-		return
-	if event is InputEventMouseButton and event.pressed:
-		_dismiss_splash()
-	elif event is InputEventScreenTouch and event.pressed:
-		_dismiss_splash()
-
-
-func _dismiss_splash():
-	if splash_dismissed:
-		return
-	splash_dismissed = true
-
-	if splash_layer == null:
-		return
-
-	var layer = splash_layer
-	splash_layer = null
-
-	var root = layer.get_child(0) if layer.get_child_count() > 0 else null
-	if root and root is CanvasItem:
-		var tween = create_tween()
-		tween.tween_property(root, "modulate:a", 0.0, 0.4)
-		tween.tween_callback(func():
-			layer.queue_free()
-			_on_splash_dismissed())
-	else:
-		layer.queue_free()
-		_on_splash_dismissed()
-
-
-func _on_splash_dismissed():
-	if player_name == "":
-		main_menu.visible = true
-		show_profile_creation()
-	else:
-		show_main_menu()
-		pause_menu.visible = false
-		pause_button.visible = false
-
+	var sc := 720.0 / ss.x
+	var sa := DisplayServer.get_display_safe_area()
+	var top_safe := sa.position.y * sc
+	if top_safe > 80:
+		safe_left_margin = max(safe_left_margin, int(top_safe * 2.2))
+	elif sa.position.x > 40:
+		safe_left_margin = max(safe_left_margin, int(sa.position.x * sc) + 10)
+	var cuts := DisplayServer.get_display_cutouts()
+	for cut in cuts:
+		if cut.position.x < 50:
+			var cr := (cut.position.x + cut.size.x) * sc
+			safe_left_margin = max(safe_left_margin, int(cr) + 20)
+	_safe_area_detected = true
+	# Reposition player info if main menu is visible
+	if main_menu and main_menu.visible:
+		var info = main_menu.get_node_or_null("PlayerInfo") as Control
+		if info:
+			info.position.x = safe_left_margin
 
 func _setup_bgm():
 	bgm_player = AudioStreamPlayer.new()
 	bgm_player.name = "BGMPlayer"
-	# Place a music file (mp3 or ogg) at res://assets/bgm.mp3 or res://assets/bgm.ogg
-	# For testing, you can use a free royalty-free loop and import it.
-	if FileAccess.file_exists("res://assets/bgm.mp3"):
-		bgm_player.stream = load("res://assets/bgm.mp3")
-	elif FileAccess.file_exists("res://assets/bgm.ogg"):
+
+	# Use ResourceLoader.exists() — FileAccess.file_exists() fails on exported Android APK
+	# because the source .ogg file path is remapped to the imported .oggvorbisstr resource.
+	if ResourceLoader.exists("res://assets/bgm.ogg"):
 		bgm_player.stream = load("res://assets/bgm.ogg")
+	elif ResourceLoader.exists("res://assets/bgm.mp3"):
+		bgm_player.stream = load("res://assets/bgm.mp3")
 	else:
 		print("No BGM file found. Add one to res://assets/bgm.* to enable background music.")
 
 	if bgm_player.stream != null:
 		if bgm_player.stream is AudioStreamOggVorbis:
 			bgm_player.stream.loop = true
-		# Ensure it loops
 
-	# Create BGM bus if not exists
-	var bgm_bus_idx = AudioServer.get_bus_index("BGM")
-	if bgm_bus_idx == -1:
-		AudioServer.add_bus()
-		bgm_bus_idx = AudioServer.bus_count - 1
-		AudioServer.set_bus_name(bgm_bus_idx, "BGM")
-
-	bgm_player.bus = "BGM"
+	# Use Master bus directly — simpler and avoids routing issues on mobile
+	bgm_player.bus = "Master"
+	bgm_player.volume_db = linear_to_db(bgm_volume)
 	add_child(bgm_player)
-
-	# Set initial volume
-	var idx = AudioServer.get_bus_index("BGM")
-	if idx != -1:
-		AudioServer.set_bus_volume_db(idx, linear_to_db(bgm_volume))
 
 
 func _setup_settings_menu():
@@ -1261,23 +1035,34 @@ func _setup_settings_menu():
 	bg.mouse_filter = Control.MOUSE_FILTER_STOP  # block clicks from passing through
 	settings_menu.add_child(bg)
 
-	# Centered panel
+	# Centered rounded panel
 	var panel = Panel.new()
-	panel.size = Vector2(400, 250)
-	panel.position = Vector2(160, 400)
+	panel.size = Vector2(520, 320)
+	panel.position = Vector2(100, 480)
 	panel.mouse_filter = Control.MOUSE_FILTER_STOP
+	var sett_style = StyleBoxFlat.new()
+	sett_style.bg_color = Color(0.18, 0.2, 0.25, 0.95)
+	sett_style.corner_radius_top_left = 24
+	sett_style.corner_radius_top_right = 24
+	sett_style.corner_radius_bottom_left = 24
+	sett_style.corner_radius_bottom_right = 24
+	panel.add_theme_stylebox_override("panel", sett_style)
 	settings_menu.add_child(panel)
 
 	# Title
 	var title = Label.new()
 	title.text = "设置"
-	title.position = Vector2(50, 20)
+	title.position = Vector2(50, 25)
+	title.add_theme_font_size_override("font_size", 30)
+	title.add_theme_color_override("font_color", Color(1, 1, 1))
 	panel.add_child(title)
 
 	# Volume
 	var vol_label = Label.new()
 	vol_label.text = "背景音乐音量"
-	vol_label.position = Vector2(50, 60)
+	vol_label.position = Vector2(50, 70)
+	vol_label.add_theme_font_size_override("font_size", 18)
+	vol_label.add_theme_color_override("font_color", Color(0.9, 0.9, 0.9))
 	panel.add_child(vol_label)
 
 	var vol_slider = HSlider.new()
@@ -1285,8 +1070,8 @@ func _setup_settings_menu():
 	vol_slider.max_value = 1
 	vol_slider.step = 0.01
 	vol_slider.value = bgm_volume
-	vol_slider.position = Vector2(50, 90)
-	vol_slider.size = Vector2(300, 30)
+	vol_slider.position = Vector2(50, 100)
+	vol_slider.size = Vector2(420, 30)
 	vol_slider.value_changed.connect(_on_volume_changed)
 	panel.add_child(vol_slider)
 	settings_vol_slider = vol_slider
@@ -1294,8 +1079,10 @@ func _setup_settings_menu():
 	# BGM on/off checkbox
 	var bgm_check = CheckBox.new()
 	bgm_check.text = "开启背景音乐"
-	bgm_check.position = Vector2(50, 135)
+	bgm_check.position = Vector2(50, 150)
 	bgm_check.button_pressed = bgm_enabled
+	bgm_check.add_theme_font_size_override("font_size", 18)
+	bgm_check.add_theme_color_override("font_color", Color(0.9, 0.9, 0.9))
 	bgm_check.toggled.connect(_on_bgm_toggled)
 	panel.add_child(bgm_check)
 	settings_bgm_check = bgm_check
@@ -1303,8 +1090,9 @@ func _setup_settings_menu():
 	# Close
 	var close = Button.new()
 	close.text = "关闭"
-	close.position = Vector2(150, 180)
-	close.size = Vector2(100, 40)
+	close.position = Vector2(185, 240)
+	close.size = Vector2(150, 55)
+	_make_rounded_button(close, Color(0.5, 0.5, 0.5))
 	close.pressed.connect(func(): settings_menu.visible = false)
 	panel.add_child(close)
 
@@ -1320,9 +1108,8 @@ func _on_settings_pressed():
 
 func _on_volume_changed(value: float):
 	bgm_volume = value
-	var idx = AudioServer.get_bus_index("BGM")
-	if idx != -1:
-		AudioServer.set_bus_volume_db(idx, linear_to_db(value))
+	if bgm_player:
+		bgm_player.volume_db = linear_to_db(value)
 	# Sync the other slider if visible
 	if pause_vol_slider and pause_vol_slider.visible:
 		pause_vol_slider.value = value
@@ -1377,9 +1164,8 @@ func load_player_data():
 		pass
 
 func apply_volume():
-	var idx = AudioServer.get_bus_index("BGM")
-	if idx != -1:
-		AudioServer.set_bus_volume_db(idx, linear_to_db(bgm_volume))
+	if bgm_player:
+		bgm_player.volume_db = linear_to_db(bgm_volume)
 	# Apply BGM enabled state
 	if not bgm_enabled and bgm_player and bgm_player.playing:
 		bgm_player.stop()
@@ -1394,52 +1180,72 @@ func show_profile_creation():
 	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
 	profile.add_child(bg)
 
+	# Rounded centered panel
 	var panel = Panel.new()
-	panel.size = Vector2(520, 420)
-	panel.position = Vector2(100, 300)
+	var pw := 560
+	var ph := 510
+	panel.size = Vector2(pw, ph)
+	panel.position = Vector2((720 - pw) / 2, (1280 - ph) / 2)
+	var ps = StyleBoxFlat.new()
+	ps.bg_color = Color(0.15, 0.17, 0.22, 0.97)
+	ps.corner_radius_top_left = 24
+	ps.corner_radius_top_right = 24
+	ps.corner_radius_bottom_left = 24
+	ps.corner_radius_bottom_right = 24
+	panel.add_theme_stylebox_override("panel", ps)
 	profile.add_child(panel)
 
 	var prompt = Label.new()
 	prompt.text = "创建玩家档案"
 	prompt.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	prompt.position = Vector2(0, 20)
-	prompt.size = Vector2(520, 40)
-	prompt.add_theme_font_size_override("font_size", 24)
+	prompt.position = Vector2(0, 25)
+	prompt.size = Vector2(pw, 40)
+	prompt.add_theme_font_size_override("font_size", 28)
+	prompt.add_theme_color_override("font_color", Color(1, 1, 1))
 	panel.add_child(prompt)
 
 	var name_label = Label.new()
 	name_label.text = "用户名:"
-	name_label.position = Vector2(30, 80)
+	name_label.position = Vector2(40, 78)
+	name_label.add_theme_font_size_override("font_size", 18)
+	name_label.add_theme_color_override("font_color", Color(0.85, 0.85, 0.85))
 	panel.add_child(name_label)
 
 	var name_edit = LineEdit.new()
 	name_edit.placeholder_text = "输入你的名字"
-	name_edit.position = Vector2(30, 110)
-	name_edit.size = Vector2(300, 35)
+	name_edit.position = Vector2(40, 108)
+	name_edit.size = Vector2(pw - 80, 42)
+	name_edit.add_theme_font_size_override("font_size", 20)
 	panel.add_child(name_edit)
 
 	var avatar_label = Label.new()
-	avatar_label.text = "选择头像 (使用游戏内图标):"
-	avatar_label.position = Vector2(30, 160)
+	avatar_label.text = "选择头像"
+	avatar_label.position = Vector2(40, 162)
+	avatar_label.add_theme_font_size_override("font_size", 18)
+	avatar_label.add_theme_color_override("font_color", Color(0.85, 0.85, 0.85))
 	panel.add_child(avatar_label)
 
 	selected_avatar_for_profile = 0
 	var av_buttons = []
-	# Manual grid for avatars to ensure proper spacing (no overlap)
-	var start_x = 40
-	var start_y = 200
-	var spacing_x = 110
-	var spacing_y = 110
+	# 3x2 grid centered in panel
+	var btn_size := 100
+	var av_spacing := 130
+	var grid_w := 3 * btn_size + 2 * (av_spacing - btn_size)
+	var av_start_x := (pw - grid_w) / 2
+	var av_start_y := 200
 	for i in range(6):
 		var col = i % 3
 		var row = i / 3
 		var btn = Button.new()
-		btn.size = Vector2(90, 90)
-		btn.position = Vector2(start_x + col * spacing_x, start_y + row * spacing_y)
+		btn.size = Vector2(btn_size, btn_size)
+		btn.position = Vector2(av_start_x + col * av_spacing, av_start_y + row * av_spacing)
+		btn.flat = true
 		var tex = TextureRect.new()
 		tex.texture = icon_textures[i]
-		tex.size = Vector2(70, 70)
-		tex.position = Vector2(10, 10)
+		tex.size = Vector2(btn_size - 10, btn_size - 10)
+		tex.position = Vector2(5, 5)
+		tex.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		tex.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		btn.add_child(tex)
 		btn.pressed.connect(_on_avatar_selected.bind(i, btn, av_buttons))
 		panel.add_child(btn)
@@ -1450,8 +1256,9 @@ func show_profile_creation():
 
 	var confirm = Button.new()
 	confirm.text = "创建并开始"
-	confirm.position = Vector2(160, 400)
-	confirm.size = Vector2(200, 50)
+	confirm.position = Vector2((pw - 260) / 2, ph - 65)
+	confirm.size = Vector2(260, 55)
+	_make_rounded_button(confirm, Color(0.3, 0.7, 0.4))
 	confirm.pressed.connect(func():
 		var nm = name_edit.text.strip_edges()
 		if nm == "":
@@ -1475,6 +1282,8 @@ func show_main_menu():
 
 	# 更新已有的 PlayerInfo，而不是删除重建（避免 queue_free 延迟导致半透明背景叠加变黑）
 	var info = _find_or_create_player_info()
+	# Reposition for camera cutout (may change between app launches)
+	info.position.x = safe_left_margin
 
 	# 刷新头像按钮里的贴图
 	for child in info.get_children():
@@ -1508,7 +1317,7 @@ func _find_or_create_player_info() -> Control:
 	# 首次创建
 	var info = Control.new()
 	info.name = "PlayerInfo"
-	info.position = Vector2(15, 15)
+	info.position = Vector2(safe_left_margin, 15)
 
 	# Clickable avatar button (click to re-select avatar and edit name)
 	var avatar_btn = Button.new()
@@ -1528,7 +1337,7 @@ func _find_or_create_player_info() -> Control:
 	nl.position = Vector2(0, 66)
 	nl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	nl.size = Vector2(60, 20)
-	nl.add_theme_font_size_override("font_size", 14)
+	nl.add_theme_font_size_override("font_size", 18)
 	nl.add_theme_color_override("font_color", Color(1, 1, 1))
 	info.add_child(nl)
 
@@ -1539,7 +1348,7 @@ func _find_or_create_player_info() -> Control:
 	prog.position = Vector2(0, 84)
 	prog.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	prog.size = Vector2(60, 18)
-	prog.add_theme_font_size_override("font_size", 12)
+	prog.add_theme_font_size_override("font_size", 16)
 	prog.add_theme_color_override("font_color", Color(0.9, 0.9, 0.5))
 	info.add_child(prog)
 
@@ -1565,52 +1374,73 @@ func show_edit_profile():
 	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
 	profile.add_child(bg)
 
+	# Rounded centered panel
 	var panel = Panel.new()
-	panel.size = Vector2(520, 420)
-	panel.position = Vector2(100, 300)
+	var pw := 560
+	var ph := 510
+	panel.size = Vector2(pw, ph)
+	panel.position = Vector2((720 - pw) / 2, (1280 - ph) / 2)
+	var ps = StyleBoxFlat.new()
+	ps.bg_color = Color(0.15, 0.17, 0.22, 0.97)
+	ps.corner_radius_top_left = 24
+	ps.corner_radius_top_right = 24
+	ps.corner_radius_bottom_left = 24
+	ps.corner_radius_bottom_right = 24
+	panel.add_theme_stylebox_override("panel", ps)
 	profile.add_child(panel)
 
 	var prompt = Label.new()
 	prompt.text = "修改档案"
 	prompt.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	prompt.position = Vector2(0, 20)
-	prompt.size = Vector2(520, 40)
-	prompt.add_theme_font_size_override("font_size", 24)
+	prompt.position = Vector2(0, 25)
+	prompt.size = Vector2(pw, 40)
+	prompt.add_theme_font_size_override("font_size", 28)
+	prompt.add_theme_color_override("font_color", Color(1, 1, 1))
 	panel.add_child(prompt)
 
 	var name_label = Label.new()
 	name_label.text = "用户名:"
-	name_label.position = Vector2(30, 80)
+	name_label.position = Vector2(40, 78)
+	name_label.add_theme_font_size_override("font_size", 18)
+	name_label.add_theme_color_override("font_color", Color(0.85, 0.85, 0.85))
 	panel.add_child(name_label)
 
 	var name_edit = LineEdit.new()
 	name_edit.placeholder_text = "输入你的名字"
 	name_edit.text = player_name
-	name_edit.position = Vector2(30, 110)
-	name_edit.size = Vector2(300, 35)
+	name_edit.position = Vector2(40, 108)
+	name_edit.size = Vector2(pw - 80, 42)
+	name_edit.add_theme_font_size_override("font_size", 20)
 	panel.add_child(name_edit)
 
 	var avatar_label = Label.new()
-	avatar_label.text = "选择头像 (点击更换):"
-	avatar_label.position = Vector2(30, 160)
+	avatar_label.text = "选择头像"
+	avatar_label.position = Vector2(40, 162)
+	avatar_label.add_theme_font_size_override("font_size", 18)
+	avatar_label.add_theme_color_override("font_color", Color(0.85, 0.85, 0.85))
 	panel.add_child(avatar_label)
 
 	var selected_av = player_avatar
 	var av_buttons = []
-	var start_x = 40
-	var start_y = 200
-	var spacing_x = 110
-	var spacing_y = 110
+	# 3x2 grid centered in panel
+	var btn_size := 100
+	var av_spacing := 130
+	var grid_w := 3 * btn_size + 2 * (av_spacing - btn_size)
+	var av_start_x := (pw - grid_w) / 2
+	var av_start_y := 200
 	for i in range(6):
 		var col = i % 3
 		var row = i / 3
 		var btn = Button.new()
-		btn.size = Vector2(90, 90)
-		btn.position = Vector2(start_x + col * spacing_x, start_y + row * spacing_y)
+		btn.size = Vector2(btn_size, btn_size)
+		btn.position = Vector2(av_start_x + col * av_spacing, av_start_y + row * av_spacing)
+		btn.flat = true
 		var tex = TextureRect.new()
 		tex.texture = icon_textures[i]
-		tex.size = Vector2(70, 70)
-		tex.position = Vector2(10, 10)
+		tex.size = Vector2(btn_size - 10, btn_size - 10)
+		tex.position = Vector2(5, 5)
+		tex.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		tex.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		btn.add_child(tex)
 		btn.pressed.connect(_on_avatar_selected.bind(i, btn, av_buttons))
 		panel.add_child(btn)
@@ -1624,8 +1454,9 @@ func show_edit_profile():
 
 	var confirm = Button.new()
 	confirm.text = "保存修改"
-	confirm.position = Vector2(160, 400)
-	confirm.size = Vector2(200, 50)
+	confirm.position = Vector2((pw - 260) / 2, ph - 65)
+	confirm.size = Vector2(260, 55)
+	_make_rounded_button(confirm, Color(0.3, 0.7, 0.4))
 	confirm.pressed.connect(func():
 		var nm = name_edit.text.strip_edges()
 		if nm == "":
