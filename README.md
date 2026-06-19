@@ -22,7 +22,7 @@
 
 ## 下载
 
-- [下载 APK (Android)](https://github.com/YOUR_USERNAME/FLUFFY羊羊乐/releases/latest)
+- [下载 AAB (Android v0.1.0)](https://github.com/shizixian/FLUFFY/releases/tag/v0.1.0)
 - 项目完全开源
 
 ## 开发
