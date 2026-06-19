@@ -20,7 +20,7 @@
 
 ## 下载
 
-- [下载 APK v0.1.0](https://github.com/shizixian/FLUFFY/releases/tag/v0.1.0) — 手机直接安装即可
+- [下载 APK v0.2.0](https://github.com/shizixian/FLUFFY/releases/tag/v0.2.0) — 手机直接安装即可
 
 ## 截图
 
