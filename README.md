@@ -22,8 +22,7 @@
 
 ## 下载
 
-- **APK** (直接安装): [FLUFFY羊羊乐-v0.1.0.apk](https://github.com/shizixian/FLUFFY/releases/tag/v0.1.0)
-- **AAB** (Google Play): [FLUFFY羊羊乐-v0.1.0.aab](https://github.com/shizixian/FLUFFY/releases/tag/v0.1.0)
+- [下载 APK v0.1.0](https://github.com/shizixian/FLUFFY/releases/tag/v0.1.0) — 手机直接安装即可
 - 项目完全开源
 
 ## 开发
