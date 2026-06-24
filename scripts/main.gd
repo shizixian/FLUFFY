@@ -1016,7 +1016,10 @@ func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel"):
 		if level_select.visible:
 			_fade_out(level_select)
-			_fade_in(main_menu)
+			show_main_menu()
+			main_menu.modulate.a = 0.0
+			var t = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+			t.tween_property(main_menu, "modulate:a", 1.0, 0.2)
 		elif pause_menu.visible:
 			_on_resume_pressed()
 		elif settings_menu.visible:
@@ -1376,7 +1379,10 @@ func _setup_level_select():
 	_make_rounded_button(back, COLOR_BTN_NEUTRAL, RADIUS_MEDIUM)
 	back.pressed.connect(func():
 		_fade_out(level_select)
-		_fade_in(main_menu)
+		show_main_menu()
+		main_menu.modulate.a = 0.0
+		var tb = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+		tb.tween_property(main_menu, "modulate:a", 1.0, 0.2)
 	)
 	panel.add_child(back)
 
