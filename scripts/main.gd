@@ -39,6 +39,150 @@ const RADIUS_PILL   = 28
 const SHADOW_SIZE   = 6
 const SHADOW_OFFSET = 3
 
+# ====================== LOCALIZATION ======================
+const LOCALE = {
+	"zh_CN": {
+		"tile_sheep": "羊", "tile_grass": "草", "tile_rice": "米",
+		"tile_field": "田", "tile_rabbit": "兔", "tile_wolf": "狼",
+		"game_title": "FLUFFY羊羊乐",
+		"game_subtitle": "可爱配对消除 · 休闲小游戏",
+		"btn_start": "开始游戏", "btn_continue": "继续游戏",
+		"btn_settings": "设置", "btn_quit": "退出游戏",
+		"btn_about": "关于 · v0.2.1", "btn_close": "关闭",
+		"btn_shuffle": "洗牌", "btn_restart": "重来",
+		"btn_pause": "⏸ 暂停", "btn_next": "下一关",
+		"btn_resume": "继续游戏", "btn_exit_main": "退出至主页",
+		"btn_back": "← 返回",
+		"lbl_level": "第 %d 关", "lbl_score": "得分: %d",
+		"lbl_remaining": "剩余: %d", "lbl_total_score": "总分: %d",
+		"lbl_level_progress": "Lv.%d",
+		"selected_one": "选中: %s", "select_another": "再选一个",
+		"msg_match": "消除成功！", "msg_no_match": "不匹配！",
+		"msg_no_moves": "牌面已无解！点击【洗牌】继续",
+		"msg_shuffled": "已洗牌",
+		"msg_shuffled_solvable": "已洗牌（可解重排）",
+		"msg_shuffled_auto": "已洗牌（系统已自动重排直到有解）",
+		"win_title": "🌟 通关！",
+		"win_level_done": "第 %d 关完成",
+		"win_time": "用时: %s",
+		"win_score": "本关得分: %d (+%d 时间奖励)",
+		"pause_title": "游戏暂停",
+		"settings_title": "设置",
+		"settings_volume": "背景音乐音量",
+		"settings_bgm": "开启背景音乐",
+		"settings_lang": "语言 / Language",
+		"about_title": "关于",
+		"about_text": "作者：ShiZixian (Zan)\n\n编程协助：Grok & Claude Code\n\n这是一个基于《FLUFFY羊羊乐》的休闲消除类小游戏。\n感谢游玩！\n\n© 2026",
+		"select_level": "关卡选择",
+		"profile_create": "创建玩家档案",
+		"profile_edit": "修改档案",
+		"profile_username": "用户名:",
+		"profile_name_placeholder": "输入你的名字",
+		"profile_avatar": "选择头像",
+		"profile_confirm_create": "创建并开始",
+		"profile_confirm_save": "保存修改",
+		"default_name": "玩家",
+		"level_new": "NEW",
+		"timer_format": "⏱ %02d:%02d",
+	},
+	"zh_TW": {
+		"tile_sheep": "羊", "tile_grass": "草", "tile_rice": "米",
+		"tile_field": "田", "tile_rabbit": "兔", "tile_wolf": "狼",
+		"game_title": "FLUFFY羊羊樂",
+		"game_subtitle": "可愛配對消除 · 休閒小遊戲",
+		"btn_start": "開始遊戲", "btn_continue": "繼續遊戲",
+		"btn_settings": "設定", "btn_quit": "退出遊戲",
+		"btn_about": "關於 · v0.2.1", "btn_close": "關閉",
+		"btn_shuffle": "洗牌", "btn_restart": "重來",
+		"btn_pause": "⏸ 暫停", "btn_next": "下一關",
+		"btn_resume": "繼續遊戲", "btn_exit_main": "退出至主頁",
+		"btn_back": "← 返回",
+		"lbl_level": "第 %d 關", "lbl_score": "得分: %d",
+		"lbl_remaining": "剩餘: %d", "lbl_total_score": "總分: %d",
+		"lbl_level_progress": "Lv.%d",
+		"selected_one": "選中: %s", "select_another": "再選一個",
+		"msg_match": "消除成功！", "msg_no_match": "不匹配！",
+		"msg_no_moves": "牌面已無解！點擊【洗牌】繼續",
+		"msg_shuffled": "已洗牌",
+		"msg_shuffled_solvable": "已洗牌（可解重排）",
+		"msg_shuffled_auto": "已洗牌（系統已自動重排直到有解）",
+		"win_title": "🌟 通關！",
+		"win_level_done": "第 %d 關完成",
+		"win_time": "用時: %s",
+		"win_score": "本關得分: %d (+%d 時間獎勵)",
+		"pause_title": "遊戲暫停",
+		"settings_title": "設定",
+		"settings_volume": "背景音樂音量",
+		"settings_bgm": "開啟背景音樂",
+		"settings_lang": "語言 / Language",
+		"about_title": "關於",
+		"about_text": "作者：ShiZixian (Zan)\n\n程式協助：Grok & Claude Code\n\n這是一個基於《FLUFFY羊羊樂》的休閒消除類小遊戲。\n感謝遊玩！\n\n© 2026",
+		"select_level": "關卡選擇",
+		"profile_create": "創建玩家檔案",
+		"profile_edit": "修改檔案",
+		"profile_username": "用戶名:",
+		"profile_name_placeholder": "輸入你的名字",
+		"profile_avatar": "選擇頭像",
+		"profile_confirm_create": "創建並開始",
+		"profile_confirm_save": "儲存修改",
+		"default_name": "玩家",
+		"level_new": "NEW",
+		"timer_format": "⏱ %02d:%02d",
+	},
+	"en": {
+		"tile_sheep": "Sheep", "tile_grass": "Grass", "tile_rice": "Rice",
+		"tile_field": "Field", "tile_rabbit": "Rabbit", "tile_wolf": "Wolf",
+		"game_title": "FLUFFY",
+		"game_subtitle": "Cute Matching Puzzle · Casual Game",
+		"btn_start": "Start", "btn_continue": "Continue",
+		"btn_settings": "Settings", "btn_quit": "Quit",
+		"btn_about": "About · v0.2.1", "btn_close": "Close",
+		"btn_shuffle": "Shuffle", "btn_restart": "Restart",
+		"btn_pause": "⏸ Pause", "btn_next": "Next",
+		"btn_resume": "Continue", "btn_exit_main": "Exit to Menu",
+		"btn_back": "← Back",
+		"lbl_level": "Level %d", "lbl_score": "Score: %d",
+		"lbl_remaining": "Left: %d", "lbl_total_score": "Total: %d",
+		"lbl_level_progress": "Lv.%d",
+		"selected_one": "Selected: %s", "select_another": "Pick another",
+		"msg_match": "Match!", "msg_no_match": "No match!",
+		"msg_no_moves": "No moves! Tap Shuffle",
+		"msg_shuffled": "Shuffled!",
+		"msg_shuffled_solvable": "Shuffled (solvable)",
+		"msg_shuffled_auto": "Shuffled (auto-solved)",
+		"win_title": "🌟 Cleared!",
+		"win_level_done": "Level %d Complete",
+		"win_time": "Time: %s",
+		"win_score": "Score: %d (+%d bonus)",
+		"pause_title": "Game Paused",
+		"settings_title": "Settings",
+		"settings_volume": "BGM Volume",
+		"settings_bgm": "Enable BGM",
+		"settings_lang": "Language",
+		"about_title": "About",
+		"about_text": "Author: ShiZixian (Zan)\n\nCode: Grok & Claude Code\n\nA casual matching puzzle game.\nThanks for playing!\n\n© 2026",
+		"select_level": "Select Level",
+		"profile_create": "Create Profile",
+		"profile_edit": "Edit Profile",
+		"profile_username": "Username:",
+		"profile_name_placeholder": "Enter your name",
+		"profile_avatar": "Choose Avatar",
+		"profile_confirm_create": "Create & Start",
+		"profile_confirm_save": "Save Changes",
+		"default_name": "Player",
+		"level_new": "NEW",
+		"timer_format": "⏱ %02d:%02d",
+	},
+}
+
+const LANG_NAMES = {
+	"zh_CN": "简体中文",
+	"zh_TW": "繁体中文",
+	"en": "English",
+}
+const LANG_LIST = ["zh_CN", "zh_TW", "en"]
+const TILE_TRANSLATION_KEYS = ["tile_sheep", "tile_grass", "tile_rice", "tile_field", "tile_rabbit", "tile_wolf"]
+
 # ====================== UI HELPERS ======================
 
 func _make_panel_style(radius: int = RADIUS_LARGE) -> StyleBoxFlat:
@@ -87,6 +231,16 @@ func _fade_out(ctrl, dur: float = 0.15) -> void:
 	var t = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
 	t.tween_property(ctrl, "modulate:a", 0.0, dur)
 	t.tween_callback(func(): ctrl.visible = false)
+
+func _t(key: String, args = []) -> String:
+	var dict = LOCALE.get(current_lang, LOCALE["zh_CN"])
+	var template: String = dict.get(key, key)
+	if args.is_empty():
+		return template
+	return template % args
+
+func _tile_name(type_idx: int) -> String:
+	return _t(TILE_TRANSLATION_KEYS[min(type_idx, TILE_TRANSLATION_KEYS.size() - 1)])
 
 # Cartoon tile icons (flat cute cartoon patterns, one per type).
 # Files are in res://assets/icons/ — you can replace any .jpg with nicer PNGs from the web.
@@ -154,6 +308,10 @@ var bgm_player: AudioStreamPlayer
 var settings_menu: Control
 var bgm_volume := 0.7
 var bgm_enabled := true
+var current_lang := "zh_CN"
+var _shuffle_message_showing := false
+var lang_selector: OptionButton
+var lang_selector_pause: OptionButton
 var pause_vol_slider: HSlider
 var settings_vol_slider: HSlider
 var pause_bgm_check: CheckBox
@@ -182,6 +340,10 @@ func _ready() -> void:
 	restart_button.size = Vector2(160, 62)
 	restart_button.position = Vector2(530, 1145)
 
+	# Set button texts (translated)
+	shuffle_button.text = _t("btn_shuffle")
+	restart_button.text = _t("btn_restart")
+
 	# Style HUD labels — add pill backgrounds behind them (as siblings, no reparenting)
 	_add_pill_behind(level_label)
 	_add_pill_behind(score_label)
@@ -207,6 +369,7 @@ func _ready() -> void:
 	# Style NextButton
 	_make_rounded_button(next_button, COLOR_BTN_GREEN, RADIUS_MEDIUM)
 	next_button.add_theme_font_size_override("font_size", 36)
+	next_button.text = _t("btn_next")
 
 	# Load cover (AI generated)
 	cover_texture = load("res://assets/cover.jpg")
@@ -263,7 +426,7 @@ func _update_timer_display():
 		var total_secs = int(elapsed_time)
 		var mins = total_secs / 60
 		var secs = total_secs % 60
-		timer_label.text = "⏱ %02d:%02d" % [mins, secs]
+		timer_label.text = _t("timer_format", [mins, secs])
 
 func start_level(new_level: int) -> void:
 	level = new_level
@@ -446,7 +609,7 @@ func handle_tile_click(card_idx: int) -> void:
 			score += 10 + level * 2
 			# remaining already decreased in remove_card
 
-			message_label.text = "消除成功！"
+			message_label.text = _t("msg_match")
 			message_label.visible = true
 			await get_tree().create_timer(0.6).timeout
 			message_label.text = ""
@@ -458,7 +621,7 @@ func handle_tile_click(card_idx: int) -> void:
 			else:
 				check_for_moves()
 		else:
-			message_label.text = "不匹配！"
+			message_label.text = _t("msg_no_match")
 			message_label.visible = true
 			await get_tree().create_timer(0.8).timeout
 			message_label.text = ""
@@ -614,9 +777,9 @@ func generate_solvable_layout(needed: Dictionary) -> bool:
 
 
 func update_ui() -> void:
-	level_label.text = "第 %d 关" % level
-	score_label.text = "得分: %d" % score
-	remaining_label.text = "剩余: %d" % remaining_tiles
+	level_label.text = _t("lbl_level", [level])
+	score_label.text = _t("lbl_score", [score])
+	remaining_label.text = _t("lbl_remaining", [remaining_tiles])
 
 func update_selected_ui() -> void:
 	if selected_idx == -1:
@@ -626,9 +789,9 @@ func update_selected_ui() -> void:
 		$UI/Selected2Pill.visible = false
 	else:
 		var t = cards[selected_idx].type
-		selected1_label.text = "选中: " + TILE_TYPES[t]
+		selected1_label.text = _t("selected_one", [_tile_name(t)])
 		selected1_label.visible = true
-		selected2_label.text = "再选一个"
+		selected2_label.text = _t("select_another")
 		selected2_label.visible = true
 		$UI/Selected1Pill.visible = true
 		$UI/Selected2Pill.visible = true
@@ -654,7 +817,7 @@ func check_for_moves() -> void:
 		message_label.visible = false
 		shuffle_button.disabled = false
 	else:
-		message_label.text = "牌面已无解！点击【洗牌】继续"
+		message_label.text = _t("msg_no_moves")
 		message_label.visible = true
 		shuffle_button.disabled = false
 
@@ -705,8 +868,9 @@ func _on_shuffle_pressed() -> void:
 	render_cards()
 
 	remaining_tiles = remaining_types.size()
-	message_label.text = "已洗牌"
+	message_label.text = _t("msg_shuffled")
 	message_label.visible = true
+	_shuffle_message_showing = true
 	update_ui()
 	check_for_moves()
 
@@ -731,13 +895,14 @@ func _on_shuffle_pressed() -> void:
 		check_for_moves()
 
 	if used_solvable_shuffle:
-		message_label.text = "已洗牌（可解重排）"
+		message_label.text = _t("msg_shuffled_solvable")
 	elif shuffle_attempts > 0:
-		message_label.text = "已洗牌（系统已自动重排直到有解）"
+		message_label.text = _t("msg_shuffled_auto")
 
 	await get_tree().create_timer(1.2).timeout
-	if message_label.text.begins_with("已洗牌"):
+	if _shuffle_message_showing:
 		message_label.text = ""
+		_shuffle_message_showing = false
 		message_label.visible = false
 
 func _on_restart_pressed() -> void:
@@ -775,7 +940,7 @@ func show_win() -> void:
 	# 更新胜利面板
 	var win_label = $UI/WinPanel/WinLabel
 	if win_label:
-		win_label.text = "🌟 通关！"
+		win_label.text = _t("win_title")
 		win_label.add_theme_color_override("font_color", COLOR_TEXT_GOLD)
 		win_label.add_theme_font_size_override("font_size", 52)
 
@@ -803,9 +968,9 @@ func show_win() -> void:
 	var total_secs = int(elapsed_time)
 	var time_str = "%02d:%02d" % [total_secs / 60, total_secs % 60]
 	var stats = [
-		"第 %d 关完成" % level,
-		"用时: %s" % time_str,
-		"本关得分: %d (+%d 时间奖励)" % [score, time_bonus],
+		_t("win_level_done", [level]),
+		_t("win_time", [time_str]),
+		_t("win_score", [score, time_bonus]),
 	]
 	var stats_y = 225
 	for stat in stats:
@@ -845,7 +1010,7 @@ func _input(event: InputEvent) -> void:
 
 func _setup_pause_button():
 	pause_button = Button.new()
-	pause_button.text = "⏸ 暂停"
+	pause_button.text = _t("btn_pause")
 	pause_button.position = Vector2(580, 50)
 	pause_button.size = Vector2(120, 48)
 	pause_button.pressed.connect(_on_pause_pressed)
@@ -865,15 +1030,15 @@ func _setup_pause_menu():
 
 	# Centered rounded panel with unified style
 	var panel = Panel.new()
-	panel.size = Vector2(520, 500)
-	panel.position = Vector2(100, 390)
+	panel.size = Vector2(520, 560)
+	panel.position = Vector2(100, 360)
 	panel.mouse_filter = Control.MOUSE_FILTER_STOP
 	panel.add_theme_stylebox_override("panel", _make_panel_style())
 	pause_menu.add_child(panel)
 
 	# Title
 	var title = Label.new()
-	title.text = "游戏暂停"
+	title.text = _t("pause_title")
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.position = Vector2(0, 30)
 	title.size = Vector2(520, 50)
@@ -883,7 +1048,7 @@ func _setup_pause_menu():
 
 	# Resume button
 	var resume = Button.new()
-	resume.text = "继续游戏"
+	resume.text = _t("btn_resume")
 	resume.position = Vector2(110, 100)
 	resume.size = Vector2(300, 70)
 	_make_rounded_button(resume, COLOR_BTN_GREEN, RADIUS_MEDIUM)
@@ -892,7 +1057,7 @@ func _setup_pause_menu():
 
 	# Exit to main menu
 	var exit_btn = Button.new()
-	exit_btn.text = "退出至主页"
+	exit_btn.text = _t("btn_exit_main")
 	exit_btn.position = Vector2(110, 190)
 	exit_btn.size = Vector2(300, 70)
 	_make_rounded_button(exit_btn, COLOR_BTN_RED, RADIUS_MEDIUM)
@@ -901,7 +1066,7 @@ func _setup_pause_menu():
 
 	# Volume control
 	var vol_label = Label.new()
-	vol_label.text = "背景音乐音量"
+	vol_label.text = _t("settings_volume")
 	vol_label.position = Vector2(50, 280)
 	vol_label.add_theme_font_size_override("font_size", 18)
 	vol_label.add_theme_color_override("font_color", COLOR_TEXT_MUTED)
@@ -920,7 +1085,7 @@ func _setup_pause_menu():
 
 	# BGM on/off checkbox
 	var bgm_check = CheckBox.new()
-	bgm_check.text = "开启背景音乐"
+	bgm_check.text = _t("settings_bgm")
 	bgm_check.position = Vector2(50, 360)
 	bgm_check.button_pressed = bgm_enabled
 	bgm_check.add_theme_font_size_override("font_size", 18)
@@ -928,6 +1093,25 @@ func _setup_pause_menu():
 	bgm_check.toggled.connect(_on_bgm_toggled)
 	panel.add_child(bgm_check)
 	pause_bgm_check = bgm_check
+
+	# Language selector
+	var pause_lang_label = Label.new()
+	pause_lang_label.text = _t("settings_lang")
+	pause_lang_label.position = Vector2(50, 410)
+	pause_lang_label.add_theme_font_size_override("font_size", 18)
+	pause_lang_label.add_theme_color_override("font_color", COLOR_TEXT_MUTED)
+	panel.add_child(pause_lang_label)
+
+	var pause_lang_opt = OptionButton.new()
+	pause_lang_opt.position = Vector2(50, 440)
+	pause_lang_opt.size = Vector2(420, 38)
+	pause_lang_opt.add_theme_font_size_override("font_size", 18)
+	for lc in LANG_LIST:
+		pause_lang_opt.add_item(LANG_NAMES[lc])
+	pause_lang_opt.select(LANG_LIST.find(current_lang))
+	pause_lang_opt.item_selected.connect(_on_language_selected)
+	panel.add_child(pause_lang_opt)
+	lang_selector_pause = pause_lang_opt
 
 	$UI.add_child(pause_menu)
 
@@ -973,7 +1157,7 @@ func _setup_main_menu():
 	main_menu.add_child(title_banner)
 
 	var title_label = Label.new()
-	title_label.text = "FLUFFY羊羊乐"
+	title_label.text = _t("game_title")
 	title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	title_label.size = Vector2(440, 66)
@@ -983,7 +1167,7 @@ func _setup_main_menu():
 	title_banner.add_child(title_label)
 
 	var subtitle_label = Label.new()
-	subtitle_label.text = "可爱配对消除 · 休闲小游戏"
+	subtitle_label.text = _t("game_subtitle")
 	subtitle_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	subtitle_label.size = Vector2(440, 28)
 	subtitle_label.position = Vector2(0, 72)
@@ -1007,16 +1191,16 @@ func _setup_main_menu():
 
 	# Start button
 	var start = Button.new()
-	start.text = "开始游戏"
+	start.text = _t("btn_start")
 	start.position = Vector2(40, 35)
 	start.size = Vector2(400, 80)
 	start.pressed.connect(_on_start_game_pressed)
 	_make_rounded_button(start, COLOR_BTN_GREEN, RADIUS_PILL)
 	btn_card.add_child(start)
-
+	start.name = "StartContinueBtn"
 	# Settings button
 	var settings_btn = Button.new()
-	settings_btn.text = "设置"
+	settings_btn.text = _t("btn_settings")
 	settings_btn.position = Vector2(40, 135)
 	settings_btn.size = Vector2(400, 70)
 	settings_btn.pressed.connect(_on_settings_pressed)
@@ -1025,7 +1209,7 @@ func _setup_main_menu():
 
 	# Quit button
 	var quit = Button.new()
-	quit.text = "退出游戏"
+	quit.text = _t("btn_quit")
 	quit.position = Vector2(40, 225)
 	quit.size = Vector2(400, 70)
 	quit.pressed.connect(func(): get_tree().quit())
@@ -1034,7 +1218,7 @@ func _setup_main_menu():
 
 	# Version / About — subtle text link at bottom of card
 	var about_btn = Button.new()
-	about_btn.text = "关于 · v0.2.1"
+	about_btn.text = _t("btn_about")
 	about_btn.position = Vector2(140, 340)
 	about_btn.size = Vector2(200, 42)
 	about_btn.flat = true
@@ -1067,7 +1251,7 @@ func _setup_level_select():
 
 	# Title
 	var title = Label.new()
-	title.text = "关卡选择"
+	title.text = _t("select_level")
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.position = Vector2(0, 20)
 	title.size = Vector2(640, 44)
@@ -1144,7 +1328,7 @@ func _setup_level_select():
 			star_color = COLOR_ACCENT_GOLD
 		elif lv == max_level:
 			# Current level — never played
-			star_str = "NEW"
+			star_str = _t("level_new")
 			star_color = COLOR_ACCENT_GOLD
 
 		if star_str != "":
@@ -1160,7 +1344,7 @@ func _setup_level_select():
 
 	# Back button
 	var back = Button.new()
-	back.text = "← 返回"
+	back.text = _t("btn_back")
 	back.position = Vector2((640 - 200) / 2, 820)
 	back.size = Vector2(200, 50)
 	_make_rounded_button(back, COLOR_BTN_NEUTRAL, RADIUS_MEDIUM)
@@ -1176,7 +1360,7 @@ func _show_level_select():
 	# Update total score display
 	var score_lbl = level_select.get_node_or_null("Panel/TotalScoreLabel") as Label
 	if score_lbl:
-		score_lbl.text = "总分: %d" % total_score
+		score_lbl.text = _t("lbl_total_score", [total_score])
 
 	# Refresh button states and star labels
 	var panel = level_select.get_node_or_null("Panel")
@@ -1203,7 +1387,7 @@ func _show_level_select():
 					star_str = "⭐☆☆"
 					star_color = COLOR_ACCENT_GOLD
 				elif lv == max_level:
-					star_str = "NEW"
+					star_str = _t("level_new")
 					star_color = COLOR_ACCENT_GOLD
 				child.text = star_str
 				child.add_theme_color_override("font_color", star_color)
@@ -1263,6 +1447,8 @@ func _on_pause_pressed():
 		pause_vol_slider.value = bgm_volume
 	if pause_bgm_check:
 		pause_bgm_check.button_pressed = bgm_enabled
+	if lang_selector_pause:
+		lang_selector_pause.select(LANG_LIST.find(current_lang))
 	_fade_in(pause_menu)
 	pause_button.visible = false
 
@@ -1315,8 +1501,8 @@ func _make_rounded_button(btn: Button, bg_color: Color, corner_radius: int = RAD
 
 func _setup_about_dialog():
 	about_dialog = AcceptDialog.new()
-	about_dialog.title = "关于"
-	about_dialog.dialog_text = "作者：ShiZixian (Zan)\n\n编程协助：Grok & Claude Code\n\n这是一个基于《FLUFFY羊羊乐》的休闲消除类小游戏。\n感谢游玩！\n\n© 2026"
+	about_dialog.title = _t("about_title")
+	about_dialog.dialog_text = _t("about_text")
 	add_child(about_dialog)
 
 func _setup_timer_label():
@@ -1330,7 +1516,7 @@ func _setup_timer_label():
 
 	timer_label = Label.new()
 	timer_label.name = "TimerLabel"
-	timer_label.text = "⏱ 00:00"
+	timer_label.text = _t("timer_format", [0, 0])
 	timer_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	timer_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	timer_label.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -1339,6 +1525,8 @@ func _setup_timer_label():
 	timer_bg.add_child(timer_label)
 
 func _on_about_pressed():
+	about_dialog.title = _t("about_title")
+	about_dialog.dialog_text = _t("about_text")
 	about_dialog.popup_centered()
 
 
@@ -1402,15 +1590,15 @@ func _setup_settings_menu():
 
 	# Centered rounded panel with unified style
 	var panel = Panel.new()
-	panel.size = Vector2(520, 320)
-	panel.position = Vector2(100, 480)
+	panel.size = Vector2(520, 430)
+	panel.position = Vector2(100, 440)
 	panel.mouse_filter = Control.MOUSE_FILTER_STOP
 	panel.add_theme_stylebox_override("panel", _make_panel_style())
 	settings_menu.add_child(panel)
 
 	# Title
 	var title = Label.new()
-	title.text = "设置"
+	title.text = _t("settings_title")
 	title.position = Vector2(50, 25)
 	title.add_theme_font_size_override("font_size", 30)
 	title.add_theme_color_override("font_color", COLOR_TEXT_LIGHT)
@@ -1418,7 +1606,7 @@ func _setup_settings_menu():
 
 	# Volume
 	var vol_label = Label.new()
-	vol_label.text = "背景音乐音量"
+	vol_label.text = _t("settings_volume")
 	vol_label.position = Vector2(50, 70)
 	vol_label.add_theme_font_size_override("font_size", 18)
 	vol_label.add_theme_color_override("font_color", COLOR_TEXT_MUTED)
@@ -1437,7 +1625,7 @@ func _setup_settings_menu():
 
 	# BGM on/off checkbox
 	var bgm_check = CheckBox.new()
-	bgm_check.text = "开启背景音乐"
+	bgm_check.text = _t("settings_bgm")
 	bgm_check.position = Vector2(50, 150)
 	bgm_check.button_pressed = bgm_enabled
 	bgm_check.add_theme_font_size_override("font_size", 18)
@@ -1446,10 +1634,29 @@ func _setup_settings_menu():
 	panel.add_child(bgm_check)
 	settings_bgm_check = bgm_check
 
+	# Language selector
+	var lang_label = Label.new()
+	lang_label.text = _t("settings_lang")
+	lang_label.position = Vector2(50, 205)
+	lang_label.add_theme_font_size_override("font_size", 18)
+	lang_label.add_theme_color_override("font_color", COLOR_TEXT_MUTED)
+	panel.add_child(lang_label)
+
+	var lang_opt = OptionButton.new()
+	lang_opt.position = Vector2(50, 235)
+	lang_opt.size = Vector2(420, 38)
+	lang_opt.add_theme_font_size_override("font_size", 18)
+	for lc in LANG_LIST:
+		lang_opt.add_item(LANG_NAMES[lc])
+	lang_opt.select(LANG_LIST.find(current_lang))
+	lang_opt.item_selected.connect(_on_language_selected)
+	panel.add_child(lang_opt)
+	lang_selector = lang_opt
+
 	# Close
 	var close = Button.new()
-	close.text = "关闭"
-	close.position = Vector2(185, 240)
+	close.text = _t("btn_close")
+	close.position = Vector2(185, 330)
 	close.size = Vector2(150, 55)
 	_make_rounded_button(close, COLOR_BTN_NEUTRAL, RADIUS_MEDIUM)
 	close.pressed.connect(func(): _fade_out(settings_menu))
@@ -1463,6 +1670,8 @@ func _on_settings_pressed():
 		settings_vol_slider.value = bgm_volume
 	if settings_bgm_check:
 		settings_bgm_check.button_pressed = bgm_enabled
+	if lang_selector:
+		lang_selector.select(LANG_LIST.find(current_lang))
 	_fade_in(settings_menu)
 
 func _on_volume_changed(value: float):
@@ -1491,6 +1700,51 @@ func _on_bgm_toggled(enabled: bool):
 		settings_bgm_check.set_pressed_no_signal(enabled)
 	save_player_data()
 
+func _on_language_selected(idx: int):
+	current_lang = LANG_LIST[idx]
+	save_player_data()
+	_refresh_language()
+
+func _refresh_language() -> void:
+	# Scene-defined buttons (from main.tscn)
+	shuffle_button.text = _t("btn_shuffle")
+	restart_button.text = _t("btn_restart")
+	next_button.text = _t("btn_next")
+	if pause_button:
+		pause_button.text = _t("btn_pause")
+
+	# Sync language selectors in both menus
+	if lang_selector:
+		lang_selector.select(LANG_LIST.find(current_lang))
+	if lang_selector_pause:
+		lang_selector_pause.select(LANG_LIST.find(current_lang))
+
+	# Main menu — re-call show_main_menu() which refreshes all text
+	if main_menu and main_menu.visible:
+		show_main_menu()
+
+	# Level select
+	if level_select and level_select.visible:
+		_show_level_select()
+
+	# Game HUD (re-call update functions which use tr())
+	update_ui()
+	update_selected_ui()
+	_update_timer_display()
+
+	# About dialog
+	if about_dialog:
+		about_dialog.title = _t("about_title")
+		about_dialog.dialog_text = _t("about_text")
+
+	# Player info level label on main menu
+	if main_menu:
+		var info = main_menu.get_node_or_null("PlayerInfo") as Control
+		if info and info.visible:
+			var prog = info.get_node_or_null("LevelLabel") as Label
+			if prog:
+				prog.text = _t("lbl_level_progress", [max_level])
+
 func _on_avatar_selected(idx: int, btn: Button, buttons: Array):
 	selected_avatar_for_profile = idx
 	for b in buttons:
@@ -1508,6 +1762,7 @@ func save_player_data():
 	config.set_value("progress", "level_stars", level_stars)
 	config.set_value("settings", "volume", bgm_volume)
 	config.set_value("settings", "bgm_enabled", bgm_enabled)
+	config.set_value("settings", "lang", current_lang)
 	config.save("user://player_data.cfg")
 
 func load_player_data():
@@ -1527,6 +1782,7 @@ func load_player_data():
 			save_player_data()
 		bgm_volume = config.get_value("settings", "volume", 0.7)
 		bgm_enabled = config.get_value("settings", "bgm_enabled", true)
+		current_lang = config.get_value("settings", "lang", "zh_CN")
 	else:
 		# First time launch - profile creation will handle
 		pass
@@ -1558,7 +1814,7 @@ func show_profile_creation():
 	profile.add_child(panel)
 
 	var prompt = Label.new()
-	prompt.text = "创建玩家档案"
+	prompt.text = _t("profile_create")
 	prompt.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	prompt.position = Vector2(0, 25)
 	prompt.size = Vector2(pw, 40)
@@ -1567,21 +1823,21 @@ func show_profile_creation():
 	panel.add_child(prompt)
 
 	var name_label = Label.new()
-	name_label.text = "用户名:"
+	name_label.text = _t("profile_username")
 	name_label.position = Vector2(40, 78)
 	name_label.add_theme_font_size_override("font_size", 18)
 	name_label.add_theme_color_override("font_color", COLOR_TEXT_MUTED)
 	panel.add_child(name_label)
 
 	var name_edit = LineEdit.new()
-	name_edit.placeholder_text = "输入你的名字"
+	name_edit.placeholder_text = _t("profile_name_placeholder")
 	name_edit.position = Vector2(40, 108)
 	name_edit.size = Vector2(pw - 80, 42)
 	name_edit.add_theme_font_size_override("font_size", 20)
 	panel.add_child(name_edit)
 
 	var avatar_label = Label.new()
-	avatar_label.text = "选择头像"
+	avatar_label.text = _t("profile_avatar")
 	avatar_label.position = Vector2(40, 162)
 	avatar_label.add_theme_font_size_override("font_size", 18)
 	avatar_label.add_theme_color_override("font_color", COLOR_TEXT_MUTED)
@@ -1617,14 +1873,14 @@ func show_profile_creation():
 	av_buttons[0].modulate = Color(1.3, 1.3, 0.5)
 
 	var confirm = Button.new()
-	confirm.text = "创建并开始"
+	confirm.text = _t("profile_confirm_create")
 	confirm.position = Vector2((pw - 260) / 2, ph - 65)
 	confirm.size = Vector2(260, 55)
 	_make_rounded_button(confirm, COLOR_BTN_GREEN, RADIUS_MEDIUM)
 	confirm.pressed.connect(func():
 		var nm = name_edit.text.strip_edges()
 		if nm == "":
-			nm = "玩家" + str(randi() % 900 + 100)
+			nm = _t("default_name") + str(randi() % 900 + 100)
 		player_name = nm
 		player_avatar = selected_avatar_for_profile
 		max_level = 1
@@ -1663,12 +1919,12 @@ func show_main_menu():
 		name_lbl.text = player_name
 	var lvl_lbl = info.get_node_or_null("LevelLabel") as Label
 	if lvl_lbl:
-		lvl_lbl.text = "Lv.%d" % max_level
+		lvl_lbl.text = _t("lbl_level_progress", [max_level])
 
 	# Update start button text based on progress
 	for child in main_menu.get_children():
-		if child is Button and ("开始游戏" in child.text or "继续游戏" in child.text):
-			child.text = "继续游戏" if max_level > 1 else "开始游戏"
+		if child is Button and child.name == "StartContinueBtn":
+			child.text = _t("btn_continue") if max_level > 1 else _t("btn_start")
 			break
 
 func _find_or_create_player_info() -> Control:
@@ -1719,7 +1975,7 @@ func _find_or_create_player_info() -> Control:
 	# Progress info
 	var prog = Label.new()
 	prog.name = "LevelLabel"
-	prog.text = "Lv.%d" % max_level
+	prog.text = _t("lbl_level_progress", [max_level])
 	prog.position = Vector2(0, 84)
 	prog.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	prog.size = Vector2(60, 18)
@@ -1772,7 +2028,7 @@ func show_edit_profile():
 	profile.add_child(panel)
 
 	var prompt = Label.new()
-	prompt.text = "修改档案"
+	prompt.text = _t("profile_edit")
 	prompt.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	prompt.position = Vector2(0, 25)
 	prompt.size = Vector2(pw, 40)
@@ -1781,14 +2037,14 @@ func show_edit_profile():
 	panel.add_child(prompt)
 
 	var name_label = Label.new()
-	name_label.text = "用户名:"
+	name_label.text = _t("profile_username")
 	name_label.position = Vector2(40, 78)
 	name_label.add_theme_font_size_override("font_size", 18)
 	name_label.add_theme_color_override("font_color", COLOR_TEXT_MUTED)
 	panel.add_child(name_label)
 
 	var name_edit = LineEdit.new()
-	name_edit.placeholder_text = "输入你的名字"
+	name_edit.placeholder_text = _t("profile_name_placeholder")
 	name_edit.text = player_name
 	name_edit.position = Vector2(40, 108)
 	name_edit.size = Vector2(pw - 80, 42)
@@ -1796,7 +2052,7 @@ func show_edit_profile():
 	panel.add_child(name_edit)
 
 	var avatar_label = Label.new()
-	avatar_label.text = "选择头像"
+	avatar_label.text = _t("profile_avatar")
 	avatar_label.position = Vector2(40, 162)
 	avatar_label.add_theme_font_size_override("font_size", 18)
 	avatar_label.add_theme_color_override("font_color", COLOR_TEXT_MUTED)
@@ -1835,7 +2091,7 @@ func show_edit_profile():
 	selected_avatar_for_profile = player_avatar
 
 	var confirm = Button.new()
-	confirm.text = "保存修改"
+	confirm.text = _t("profile_confirm_save")
 	confirm.position = Vector2((pw - 260) / 2, ph - 65)
 	confirm.size = Vector2(260, 55)
 	_make_rounded_button(confirm, COLOR_BTN_GREEN, RADIUS_MEDIUM)
