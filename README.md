@@ -1,49 +1,47 @@
-# 🐑 FLUFFY羊羊乐
+# 🐑 FLUFFY
 
-经典休闲配对消除小游戏，类似《羊了个羊》。基于 Godot 4.6 开发。
+A cute casual tile-matching puzzle game built with Godot 4.6.
 
-## 游戏玩法
+## Gameplay
 
-- 点击没有被覆盖的牌（free 状态）
-- 选择两张相同类型的牌即可消除
-- 消除所有卡牌通关
-- 关卡越高，牌越多、堆叠越深，难度递增
+- Tap uncovered (free) tiles
+- Select two matching tiles to eliminate them
+- Clear all tiles to win
+- Higher levels = more tiles, deeper stacks, increasing difficulty
 
-## 特性
+## Features
 
-- ✅ 渐进式难度系统
-- ✅ 可解布局生成算法（反向配对放置）
-- ✅ 计时器 + 星级评分（≤3.5s/对=⭐⭐⭐）
-- ✅ 玩家档案（用户名 + 头像）
-- ✅ BGM 开关控制
-- ✅ 洗牌和重来功能
+- ✅ Progressive difficulty system
+- ✅ Solvable layout generation (reverse-pair placement)
+- ✅ Timer + star rating (≤3.5s per pair = ⭐⭐⭐)
+- ✅ Player profile (name + avatar)
+- ✅ BGM toggle control
+- ✅ Shuffle & restart options
 
-## 下载
+## Download
 
-- [下载 APK v0.2.0](https://github.com/shizixian/FLUFFY/releases/tag/v0.2.0) — 手机直接安装即可
+- [Download APK](https://github.com/shizixian/FLUFFY/releases/latest) — install directly on Android
 
-## 截图
+## Screenshots
 
-| 主菜单 | 游戏画面 |
+| Main Menu | Gameplay |
 |:---:|:---:|
 | ![](screenshot_menu.png) | ![](screenshot_game.png) |
 
-- 项目完全开源
+## Development
 
-## 开发
+- **Engine**: Godot 4.6.3
+- **Language**: GDScript
+- **Resolution**: 720×1280 portrait
 
-- **引擎**: Godot 4.6.3
-- **语言**: GDScript
-- **分辨率**: 720×1280 竖屏
+### Run
 
-### 运行
+Open the project with Godot 4.6.3, press F5.
 
-用 Godot 4.6.3 打开项目，F5 运行。
+## Credits
 
-## 致谢
-
-- 作者：ShiZixian (Zan)
-- 编程协助：Grok & Claude Code
+- Author: ShiZixian (Zan)
+- Programming assistance: Grok & Claude Code
 
 ## License
 
