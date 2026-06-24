@@ -1014,6 +1014,7 @@ func _input(event: InputEvent) -> void:
 	# Card touch handled by Button.pressed signals (see _on_card_button_pressed).
 	# Only global shortcuts here.
 	if event.is_action_pressed("ui_cancel"):
+		get_viewport().set_input_as_handled()
 		if level_select.visible:
 			_fade_out(level_select)
 			show_main_menu()
@@ -1024,6 +1025,8 @@ func _input(event: InputEvent) -> void:
 			_on_resume_pressed()
 		elif settings_menu.visible:
 			_fade_out(settings_menu)
+		elif main_menu.visible:
+			pass  # do nothing — let user stay on main menu
 		else:
 			_on_restart_pressed()
 
