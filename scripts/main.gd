@@ -13,6 +13,81 @@ const COLORS = [
 	Color(0.7, 0.7, 0.9),  # 狼 紫
 ]
 
+# ====================== UI COLOR PALETTE ======================
+# Warm, inviting palette for a cute casual matching game
+# --- Background & Surfaces ---
+const COLOR_SURFACE_DARK  = Color(0.282, 0.220, 0.184, 0.95)  # warm dark panel bg
+const COLOR_OVERLAY       = Color(0.078, 0.051, 0.020, 0.55)  # warm dark overlay
+const COLOR_OVERLAY_DEEP  = Color(0.078, 0.051, 0.020, 0.85)  # deep overlay for modals
+const COLOR_ACCENT_GOLD   = Color(1.000, 0.851, 0.250)        # gold accent borders
+# --- Text ---
+const COLOR_TEXT_LIGHT    = Color(1.000, 0.969, 0.922)        # light warm text on dark
+const COLOR_TEXT_MUTED    = Color(0.753, 0.682, 0.600)        # muted text
+const COLOR_TEXT_GOLD     = Color(1.000, 0.780, 0.149)        # gold text
+const COLOR_TEXT_DARK     = Color(0.220, 0.149, 0.102)        # dark text on cream bg
+# --- Buttons ---
+const COLOR_BTN_GREEN     = Color(0.451, 0.780, 0.451)        # start / continue
+const COLOR_BTN_RED       = Color(0.882, 0.400, 0.353)        # quit / exit
+const COLOR_BTN_BLUE      = Color(0.498, 0.620, 0.820)        # settings
+const COLOR_BTN_ORANGE    = Color(1.000, 0.722, 0.400)        # shuffle
+const COLOR_BTN_ROSE      = Color(0.780, 0.502, 0.400)        # restart
+const COLOR_BTN_NEUTRAL   = Color(0.651, 0.549, 0.451)        # pause / close
+# --- Sizing ---
+const RADIUS_LARGE  = 24
+const RADIUS_MEDIUM = 18
+const RADIUS_PILL   = 28
+const SHADOW_SIZE   = 6
+const SHADOW_OFFSET = 3
+
+# ====================== UI HELPERS ======================
+
+func _make_panel_style(radius: int = RADIUS_LARGE) -> StyleBoxFlat:
+	var s = StyleBoxFlat.new()
+	s.bg_color = COLOR_SURFACE_DARK
+	s.set_corner_radius_all(radius)
+	s.border_width_left = 1
+	s.border_width_right = 1
+	s.border_width_top = 1
+	s.border_width_bottom = 1
+	s.border_color = Color(1, 0.95, 0.85, 0.06)
+	s.shadow_size = SHADOW_SIZE
+	s.shadow_offset = Vector2(0, SHADOW_OFFSET)
+	s.shadow_color = Color(0, 0, 0, 0.3)
+	return s
+
+func _make_pill_style(bg_color: Color = COLOR_SURFACE_DARK) -> StyleBoxFlat:
+	var s = StyleBoxFlat.new()
+	s.bg_color = bg_color
+	s.set_corner_radius_all(RADIUS_PILL)
+	s.content_margin_left = 14
+	s.content_margin_right = 14
+	s.content_margin_top = 4
+	s.content_margin_bottom = 4
+	return s
+
+func _add_pill_behind(label_node: Label, extra_padding: Vector2 = Vector2(24, 10)) -> void:
+	# Place a semi-transparent pill Panel behind the label (as sibling, no reparenting)
+	var pill = Panel.new()
+	pill.name = label_node.name + "Pill"
+	pill.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	pill.position = label_node.position - extra_padding / 2
+	pill.size = label_node.size + extra_padding
+	var style = _make_pill_style(Color(COLOR_SURFACE_DARK.r, COLOR_SURFACE_DARK.g, COLOR_SURFACE_DARK.b, 0.7))
+	pill.add_theme_stylebox_override("panel", style)
+	label_node.get_parent().add_child(pill)
+	label_node.get_parent().move_child(pill, label_node.get_index())
+
+func _fade_in(ctrl, dur: float = 0.2) -> void:
+	ctrl.modulate.a = 0.0
+	ctrl.visible = true
+	var t = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	t.tween_property(ctrl, "modulate:a", 1.0, dur)
+
+func _fade_out(ctrl, dur: float = 0.15) -> void:
+	var t = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
+	t.tween_property(ctrl, "modulate:a", 0.0, dur)
+	t.tween_callback(func(): ctrl.visible = false)
+
 # Cartoon tile icons (flat cute cartoon patterns, one per type).
 # Files are in res://assets/icons/ — you can replace any .jpg with nicer PNGs from the web.
 var icon_textures: Array[Texture2D] = [
@@ -69,6 +144,7 @@ var selected_node = null  # the node for highlight, for convenience
 
 # New menu system
 var main_menu: CanvasLayer
+var level_select: Control
 var pause_menu: Control
 var pause_button: Button
 var cover_texture: Texture2D
@@ -87,6 +163,7 @@ var settings_bgm_check: CheckBox
 var player_name := ""
 var player_avatar := 0  # 0-5 corresponding to icon_textures
 var max_level := 1
+var level_stars: Array = []  # per-level stars (index 0 = level 1)
 var total_score := 0
 var selected_avatar_for_profile := 0
 var safe_left_margin := 50  # adjusted for camera cutouts on mobile
@@ -96,6 +173,40 @@ func _ready() -> void:
 	shuffle_button.pressed.connect(_on_shuffle_pressed)
 	restart_button.pressed.connect(_on_restart_pressed)
 	next_button.pressed.connect(_on_next_level)
+
+	# Style HUD buttons (scene-defined, no styling yet)
+	_make_rounded_button(shuffle_button, COLOR_BTN_ORANGE, RADIUS_PILL)
+	shuffle_button.size = Vector2(160, 62)
+	shuffle_button.position = Vector2(355, 1145)
+	_make_rounded_button(restart_button, COLOR_BTN_ROSE, RADIUS_PILL)
+	restart_button.size = Vector2(160, 62)
+	restart_button.position = Vector2(530, 1145)
+
+	# Style HUD labels — add pill backgrounds behind them (as siblings, no reparenting)
+	_add_pill_behind(level_label)
+	_add_pill_behind(score_label)
+	_add_pill_behind(remaining_label)
+	_add_pill_behind(selected1_label)
+	_add_pill_behind(selected2_label)
+
+	# Message label styling
+	message_label.add_theme_color_override("font_color", COLOR_TEXT_GOLD)
+	message_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.4))
+	message_label.add_theme_font_size_override("font_size", 48)
+
+	# WinPanel styling — unified panel with gold border
+	var win_style = _make_panel_style()
+	win_style.bg_color = Color(COLOR_SURFACE_DARK.r, COLOR_SURFACE_DARK.g, COLOR_SURFACE_DARK.b, 0.93)
+	win_style.border_color = COLOR_ACCENT_GOLD
+	win_style.border_width_left = 2
+	win_style.border_width_right = 2
+	win_style.border_width_top = 2
+	win_style.border_width_bottom = 2
+	win_panel.add_theme_stylebox_override("panel", win_style)
+
+	# Style NextButton
+	_make_rounded_button(next_button, COLOR_BTN_GREEN, RADIUS_MEDIUM)
+	next_button.add_theme_font_size_override("font_size", 36)
 
 	# Load cover (AI generated)
 	cover_texture = load("res://assets/cover.jpg")
@@ -112,14 +223,15 @@ func _ready() -> void:
 	_setup_settings_menu()
 	_setup_timer_label()
 
+	# Load player data before building level select (needs max_level/level_stars)
+	load_player_data()
+	_setup_level_select()
+
 	# Sync initial slider values
 	if pause_vol_slider:
 		pause_vol_slider.value = bgm_volume
 	if settings_vol_slider:
 		settings_vol_slider.value = bgm_volume
-
-	# Load player data and decide UI
-	load_player_data()
 	apply_volume()
 
 	# Start BGM if enabled
@@ -161,7 +273,10 @@ func start_level(new_level: int) -> void:
 	timer_running = true
 	_update_timer_display()
 	message_label.text = ""
+	message_label.visible = false
 	win_panel.visible = false
+	selected1_label.visible = false
+	selected2_label.visible = false
 	selected_idx = -1
 	selected_node = null
 	update_ui()
@@ -332,8 +447,10 @@ func handle_tile_click(card_idx: int) -> void:
 			# remaining already decreased in remove_card
 
 			message_label.text = "消除成功！"
+			message_label.visible = true
 			await get_tree().create_timer(0.6).timeout
 			message_label.text = ""
+			message_label.visible = false
 
 			# Check win
 			if remaining_tiles <= 0:
@@ -342,8 +459,10 @@ func handle_tile_click(card_idx: int) -> void:
 				check_for_moves()
 		else:
 			message_label.text = "不匹配！"
+			message_label.visible = true
 			await get_tree().create_timer(0.8).timeout
 			message_label.text = ""
+			message_label.visible = false
 
 			# Deselect old
 			if selected_node and is_instance_valid(selected_node):
@@ -501,12 +620,18 @@ func update_ui() -> void:
 
 func update_selected_ui() -> void:
 	if selected_idx == -1:
-		selected1_label.text = "选中: 无"
-		selected2_label.text = "选中: 无"
+		selected1_label.visible = false
+		selected2_label.visible = false
+		$UI/Selected1Pill.visible = false
+		$UI/Selected2Pill.visible = false
 	else:
 		var t = cards[selected_idx].type
 		selected1_label.text = "选中: " + TILE_TYPES[t]
+		selected1_label.visible = true
 		selected2_label.text = "再选一个"
+		selected2_label.visible = true
+		$UI/Selected1Pill.visible = true
+		$UI/Selected2Pill.visible = true
 
 func has_possible_move() -> bool:
 	# Returns true if there exists at least one pair of free cards with the same type.
@@ -526,9 +651,11 @@ func check_for_moves() -> void:
 		return
 	if has_possible_move():
 		message_label.text = ""
+		message_label.visible = false
 		shuffle_button.disabled = false
 	else:
 		message_label.text = "牌面已无解！点击【洗牌】继续"
+		message_label.visible = true
 		shuffle_button.disabled = false
 
 func _on_shuffle_pressed() -> void:
@@ -579,6 +706,7 @@ func _on_shuffle_pressed() -> void:
 
 	remaining_tiles = remaining_types.size()
 	message_label.text = "已洗牌"
+	message_label.visible = true
 	update_ui()
 	check_for_moves()
 
@@ -610,6 +738,7 @@ func _on_shuffle_pressed() -> void:
 	await get_tree().create_timer(1.2).timeout
 	if message_label.text.begins_with("已洗牌"):
 		message_label.text = ""
+		message_label.visible = false
 
 func _on_restart_pressed() -> void:
 	start_level(level)
@@ -647,25 +776,28 @@ func show_win() -> void:
 	var win_label = $UI/WinPanel/WinLabel
 	if win_label:
 		win_label.text = "🌟 通关！"
+		win_label.add_theme_color_override("font_color", COLOR_TEXT_GOLD)
+		win_label.add_theme_font_size_override("font_size", 52)
 
 	# 清除旧的统计标签
 	for child in win_panel.get_children():
 		if child.name.begins_with("Stat_"):
 			child.queue_free()
 
-	# 星级
-	var star_str = ""
+	# 星级 — centered HBoxContainer with individual star labels
+	var star_container = HBoxContainer.new()
+	star_container.name = "Stat_StarsContainer"
+	star_container.alignment = BoxContainer.ALIGNMENT_CENTER
+	star_container.size = Vector2(400, 60)
+	star_container.position = Vector2(120, 150)
 	for i in range(3):
-		star_str += "⭐" if i < stars else "☆"
-
-	var star_label = Label.new()
-	star_label.name = "Stat_Stars"
-	star_label.text = star_str
-	star_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	star_label.position = Vector2(20, 160)
-	star_label.size = Vector2(480, 40)
-	star_label.add_theme_font_size_override("font_size", 36)
-	win_panel.add_child(star_label)
+		var star_lbl = Label.new()
+		star_lbl.text = "⭐" if i < stars else "☆"
+		star_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		star_lbl.add_theme_font_size_override("font_size", 42)
+		star_lbl.size = Vector2(100, 56)
+		star_container.add_child(star_lbl)
+	win_panel.add_child(star_container)
 
 	# 统计信息
 	var total_secs = int(elapsed_time)
@@ -675,7 +807,7 @@ func show_win() -> void:
 		"用时: %s" % time_str,
 		"本关得分: %d (+%d 时间奖励)" % [score, time_bonus],
 	]
-	var stats_y = 220
+	var stats_y = 225
 	for stat in stats:
 		var sl = Label.new()
 		sl.name = "Stat_%s" % stat
@@ -684,6 +816,7 @@ func show_win() -> void:
 		sl.position = Vector2(20, stats_y)
 		sl.size = Vector2(480, 30)
 		sl.add_theme_font_size_override("font_size", 20)
+		sl.add_theme_color_override("font_color", COLOR_TEXT_LIGHT)
 		win_panel.add_child(sl)
 		stats_y += 35
 
@@ -698,44 +831,44 @@ func _input(event: InputEvent) -> void:
 	# Card touch handled by Button.pressed signals (see _on_card_button_pressed).
 	# Only global shortcuts here.
 	if event.is_action_pressed("ui_cancel"):
-		_on_restart_pressed()
+		if level_select.visible:
+			_fade_out(level_select)
+			_fade_in(main_menu)
+		elif pause_menu.visible:
+			_on_resume_pressed()
+		elif settings_menu.visible:
+			_fade_out(settings_menu)
+		else:
+			_on_restart_pressed()
 
 # ====================== NEW MENU SYSTEM ======================
 
 func _setup_pause_button():
 	pause_button = Button.new()
-	pause_button.text = "暂停"
-	pause_button.position = Vector2(580, 20)
-	pause_button.size = Vector2(120, 60)
+	pause_button.text = "⏸ 暂停"
+	pause_button.position = Vector2(580, 50)
+	pause_button.size = Vector2(120, 48)
 	pause_button.pressed.connect(_on_pause_pressed)
+	_make_rounded_button(pause_button, COLOR_BTN_NEUTRAL, RADIUS_PILL)
 	$UI.add_child(pause_button)
 
 func _setup_pause_menu():
 	pause_menu = Control.new()
 	pause_menu.set_anchors_preset(Control.PRESET_FULL_RECT)
 
-	# Semi-transparent background
+	# Warm semi-transparent background
 	var bg = ColorRect.new()
-	bg.color = Color(0, 0, 0, 0.6)
+	bg.color = COLOR_OVERLAY
 	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
 	bg.mouse_filter = Control.MOUSE_FILTER_STOP
 	pause_menu.add_child(bg)
 
-	# Centered rounded panel
+	# Centered rounded panel with unified style
 	var panel = Panel.new()
 	panel.size = Vector2(520, 500)
-	# Center horizontally on 720px screen: (720-520)/2 = 100
-	# Center vertically: (1280-500)/2 = 390
 	panel.position = Vector2(100, 390)
 	panel.mouse_filter = Control.MOUSE_FILTER_STOP
-	# Round corners
-	var panel_style = StyleBoxFlat.new()
-	panel_style.bg_color = Color(0.18, 0.2, 0.25, 0.95)
-	panel_style.corner_radius_top_left = 24
-	panel_style.corner_radius_top_right = 24
-	panel_style.corner_radius_bottom_left = 24
-	panel_style.corner_radius_bottom_right = 24
-	panel.add_theme_stylebox_override("panel", panel_style)
+	panel.add_theme_stylebox_override("panel", _make_panel_style())
 	pause_menu.add_child(panel)
 
 	# Title
@@ -745,7 +878,7 @@ func _setup_pause_menu():
 	title.position = Vector2(0, 30)
 	title.size = Vector2(520, 50)
 	title.add_theme_font_size_override("font_size", 36)
-	title.add_theme_color_override("font_color", Color(1, 1, 1))
+	title.add_theme_color_override("font_color", COLOR_TEXT_LIGHT)
 	panel.add_child(title)
 
 	# Resume button
@@ -753,7 +886,7 @@ func _setup_pause_menu():
 	resume.text = "继续游戏"
 	resume.position = Vector2(110, 100)
 	resume.size = Vector2(300, 70)
-	_make_rounded_button(resume, Color(0.3, 0.7, 0.4))
+	_make_rounded_button(resume, COLOR_BTN_GREEN, RADIUS_MEDIUM)
 	resume.pressed.connect(_on_resume_pressed)
 	panel.add_child(resume)
 
@@ -762,7 +895,7 @@ func _setup_pause_menu():
 	exit_btn.text = "退出至主页"
 	exit_btn.position = Vector2(110, 190)
 	exit_btn.size = Vector2(300, 70)
-	_make_rounded_button(exit_btn, Color(0.8, 0.3, 0.3))
+	_make_rounded_button(exit_btn, COLOR_BTN_RED, RADIUS_MEDIUM)
 	exit_btn.pressed.connect(_on_exit_to_main_pressed)
 	panel.add_child(exit_btn)
 
@@ -771,7 +904,7 @@ func _setup_pause_menu():
 	vol_label.text = "背景音乐音量"
 	vol_label.position = Vector2(50, 280)
 	vol_label.add_theme_font_size_override("font_size", 18)
-	vol_label.add_theme_color_override("font_color", Color(0.9, 0.9, 0.9))
+	vol_label.add_theme_color_override("font_color", COLOR_TEXT_MUTED)
 	panel.add_child(vol_label)
 
 	var vol_slider = HSlider.new()
@@ -791,7 +924,7 @@ func _setup_pause_menu():
 	bgm_check.position = Vector2(50, 360)
 	bgm_check.button_pressed = bgm_enabled
 	bgm_check.add_theme_font_size_override("font_size", 18)
-	bgm_check.add_theme_color_override("font_color", Color(0.9, 0.9, 0.9))
+	bgm_check.add_theme_color_override("font_color", COLOR_TEXT_MUTED)
 	bgm_check.toggled.connect(_on_bgm_toggled)
 	panel.add_child(bgm_check)
 	pause_bgm_check = bgm_check
@@ -808,73 +941,280 @@ func _setup_main_menu():
 	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
 	main_menu.add_child(bg)
 
-	# Dark overlay for readability
-	var overlay = ColorRect.new()
-	overlay.color = Color(0, 0, 0, 0.25)
-	overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
-	main_menu.add_child(overlay)
+	# Two-tone warm overlay: lighter top, darker bottom for readability
+	var overlay_top = ColorRect.new()
+	overlay_top.color = Color(0.078, 0.051, 0.020, 0.25)
+	overlay_top.set_anchors_preset(Control.PRESET_TOP_WIDE)
+	overlay_top.anchor_bottom = 0.35
+	main_menu.add_child(overlay_top)
 
-	# No title text or subtitle on main menu (per request) — the game name is only on the cover image.
+	var overlay_bottom = ColorRect.new()
+	overlay_bottom.color = Color(0.078, 0.051, 0.020, 0.50)
+	overlay_bottom.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
+	overlay_bottom.anchor_top = 0.35
+	main_menu.add_child(overlay_bottom)
 
-	# Start button - rounded
+	# Title banner — centered card with gold border
+	var title_banner = Panel.new()
+	title_banner.size = Vector2(440, 120)
+	title_banner.position = Vector2((720 - 440) / 2, 200)
+	var banner_style = StyleBoxFlat.new()
+	banner_style.bg_color = Color(COLOR_SURFACE_DARK.r, COLOR_SURFACE_DARK.g, COLOR_SURFACE_DARK.b, 0.88)
+	banner_style.set_corner_radius_all(28)
+	banner_style.border_width_left = 2
+	banner_style.border_width_right = 2
+	banner_style.border_width_top = 2
+	banner_style.border_width_bottom = 2
+	banner_style.border_color = COLOR_ACCENT_GOLD
+	banner_style.shadow_size = 10
+	banner_style.shadow_offset = Vector2(0, 4)
+	banner_style.shadow_color = Color(0, 0, 0, 0.3)
+	title_banner.add_theme_stylebox_override("panel", banner_style)
+	main_menu.add_child(title_banner)
+
+	var title_label = Label.new()
+	title_label.text = "FLUFFY羊羊乐"
+	title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	title_label.size = Vector2(440, 66)
+	title_label.position = Vector2(0, 6)
+	title_label.add_theme_font_size_override("font_size", 48)
+	title_label.add_theme_color_override("font_color", COLOR_TEXT_GOLD)
+	title_banner.add_child(title_label)
+
+	var subtitle_label = Label.new()
+	subtitle_label.text = "可爱配对消除 · 休闲小游戏"
+	subtitle_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	subtitle_label.size = Vector2(440, 28)
+	subtitle_label.position = Vector2(0, 72)
+	subtitle_label.add_theme_font_size_override("font_size", 16)
+	subtitle_label.add_theme_color_override("font_color", COLOR_TEXT_MUTED)
+	title_banner.add_child(subtitle_label)
+
+	# Button card — centered panel containing all action buttons
+	var btn_card_y = 700
+	var btn_card = Panel.new()
+	btn_card.size = Vector2(480, 420)
+	btn_card.position = Vector2((720 - 480) / 2, btn_card_y)
+	var card_style = StyleBoxFlat.new()
+	card_style.bg_color = Color(0, 0, 0, 0)
+	card_style.set_corner_radius_all(RADIUS_LARGE)
+	card_style.shadow_size = SHADOW_SIZE
+	card_style.shadow_offset = Vector2(0, SHADOW_OFFSET)
+	card_style.shadow_color = Color(0, 0, 0, 0.3)
+	btn_card.add_theme_stylebox_override("panel", card_style)
+	main_menu.add_child(btn_card)
+
+	# Start button
 	var start = Button.new()
 	start.text = "开始游戏"
-	start.position = Vector2(160, 980)
-	start.size = Vector2(400, 90)
+	start.position = Vector2(40, 35)
+	start.size = Vector2(400, 80)
 	start.pressed.connect(_on_start_game_pressed)
-	_make_rounded_button(start, Color(0.3, 0.7, 0.4))
-	main_menu.add_child(start)
+	_make_rounded_button(start, COLOR_BTN_GREEN, RADIUS_PILL)
+	btn_card.add_child(start)
 
-	# Quit button - rounded
-	var quit = Button.new()
-	quit.text = "退出游戏"
-	quit.position = Vector2(160, 1090)
-	quit.size = Vector2(400, 75)
-	quit.pressed.connect(func(): get_tree().quit())
-	_make_rounded_button(quit, Color(0.8, 0.3, 0.3))
-	main_menu.add_child(quit)
-
-	# Settings button on main menu
+	# Settings button
 	var settings_btn = Button.new()
 	settings_btn.text = "设置"
-	settings_btn.position = Vector2(160, 1180)
-	settings_btn.size = Vector2(400, 75)
+	settings_btn.position = Vector2(40, 135)
+	settings_btn.size = Vector2(400, 70)
 	settings_btn.pressed.connect(_on_settings_pressed)
-	_make_rounded_button(settings_btn, Color(0.4, 0.6, 0.8))
-	main_menu.add_child(settings_btn)
+	_make_rounded_button(settings_btn, COLOR_BTN_BLUE, RADIUS_MEDIUM)
+	btn_card.add_child(settings_btn)
 
-	# Bottom right: Yellow ! about icon + "关于"
-	var about_container = Control.new()
-	about_container.size = Vector2(70, 65)
-	about_container.position = Vector2(640, 1200)  # bottom right for 720x1280, slightly adjusted
-	main_menu.add_child(about_container)
+	# Quit button
+	var quit = Button.new()
+	quit.text = "退出游戏"
+	quit.position = Vector2(40, 225)
+	quit.size = Vector2(400, 70)
+	quit.pressed.connect(func(): get_tree().quit())
+	_make_rounded_button(quit, COLOR_BTN_RED, RADIUS_MEDIUM)
+	btn_card.add_child(quit)
 
-	# Yellow exclamation icon button for 关于
+	# Version / About — subtle text link at bottom of card
 	var about_btn = Button.new()
-	about_btn.text = "❗"
-	about_btn.size = Vector2(50, 50)
-	about_btn.position = Vector2(10, 0)
-	var yellow_style = StyleBoxFlat.new()
-	yellow_style.bg_color = Color(1, 0.85, 0)
-	yellow_style.corner_radius_top_left = 18
-	yellow_style.corner_radius_top_right = 18
-	yellow_style.corner_radius_bottom_left = 18
-	yellow_style.corner_radius_bottom_right = 18
-	about_btn.add_theme_stylebox_override("normal", yellow_style)
-	about_btn.add_theme_font_size_override("font_size", 22)
+	about_btn.text = "关于 · v0.2.0"
+	about_btn.position = Vector2(140, 340)
+	about_btn.size = Vector2(200, 42)
+	about_btn.flat = true
+	about_btn.add_theme_font_size_override("font_size", 14)
+	about_btn.add_theme_color_override("font_color", COLOR_TEXT_MUTED)
+	about_btn.add_theme_color_override("font_hover_color", COLOR_TEXT_GOLD)
 	about_btn.pressed.connect(_on_about_pressed)
-	about_container.add_child(about_btn)
-
-	# "关于" text below
-	var about_label = Label.new()
-	about_label.text = "关于"
-	about_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	about_label.size = Vector2(70, 18)
-	about_label.position = Vector2(0, 38)
-	about_label.add_theme_font_size_override("font_size", 12)
-	about_container.add_child(about_label)
+	btn_card.add_child(about_btn)
 
 	add_child(main_menu)
+
+func _setup_level_select():
+	level_select = Control.new()
+	level_select.set_anchors_preset(Control.PRESET_FULL_RECT)
+	level_select.visible = false
+
+	# Warm dark background
+	var bg = ColorRect.new()
+	bg.color = COLOR_OVERLAY_DEEP
+	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
+	bg.mouse_filter = Control.MOUSE_FILTER_STOP
+	level_select.add_child(bg)
+
+	# Panel — centered vertically on screen
+	var panel = Panel.new()
+	panel.size = Vector2(640, 880)
+	panel.position = Vector2((720 - 640) / 2, (1280 - 880) / 2)
+	panel.add_theme_stylebox_override("panel", _make_panel_style())
+	level_select.add_child(panel)
+
+	# Title
+	var title = Label.new()
+	title.text = "关卡选择"
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title.position = Vector2(0, 20)
+	title.size = Vector2(640, 44)
+	title.add_theme_font_size_override("font_size", 32)
+	title.add_theme_color_override("font_color", COLOR_TEXT_GOLD)
+	panel.add_child(title)
+
+	# Total score
+	var score_lbl = Label.new()
+	score_lbl.name = "TotalScoreLabel"
+	score_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	score_lbl.position = Vector2(0, 64)
+	score_lbl.size = Vector2(640, 30)
+	score_lbl.add_theme_font_size_override("font_size", 20)
+	score_lbl.add_theme_color_override("font_color", COLOR_TEXT_LIGHT)
+	panel.add_child(score_lbl)
+
+	# Grid of level buttons — 5 per row, scrollable if many levels
+	var grid_start_y = 110
+	var btn_size = 90
+	var star_area_h = 26
+	var cell_w = 640 / 5  # 128px per cell
+	var cell_h = btn_size + star_area_h + 16  # ~132px
+
+	var level_count = max(max_level, 10)  # show at least 10 slots
+	var total = level_count + 4  # a few extra locked slots for visual
+
+	for i in range(total):
+		var lv = i + 1
+		var col = i % 5
+		var row = i / 5
+		var cx = col * cell_w + (cell_w - btn_size) / 2
+		var cy = grid_start_y + row * cell_h
+
+		# Level button (circle-ish via pill radius)
+		var lv_btn = Button.new()
+		lv_btn.text = str(lv)
+		lv_btn.size = Vector2(btn_size, btn_size)
+		lv_btn.position = Vector2(cx, cy)
+		lv_btn.add_theme_font_size_override("font_size", 28)
+		if lv <= max_level:
+			# Unlocked — colored button
+			_make_rounded_button(lv_btn, COLOR_BTN_GREEN, btn_size / 2)
+		else:
+			# Locked — gray
+			var locked = StyleBoxFlat.new()
+			locked.bg_color = Color(0.35, 0.3, 0.25, 0.7)
+			locked.set_corner_radius_all(btn_size / 2)
+			locked.border_width_left = 2
+			locked.border_width_right = 2
+			locked.border_width_top = 2
+			locked.border_width_bottom = 2
+			locked.border_color = Color(0.5, 0.45, 0.4, 0.5)
+			lv_btn.add_theme_stylebox_override("normal", locked)
+			lv_btn.add_theme_font_size_override("font_size", 28)
+			lv_btn.add_theme_color_override("font_color", Color(0.5, 0.5, 0.5))
+			lv_btn.disabled = true
+		lv_btn.pressed.connect(_on_level_selected.bind(lv))
+		panel.add_child(lv_btn)
+
+		# Stars below button
+		var star_str = ""
+		var star_color = COLOR_TEXT_MUTED
+		if lv <= level_stars.size():
+			# Has star data — show actual stars
+			var s = level_stars[lv - 1]
+			for j in range(3):
+				star_str += "⭐" if j < s else "☆"
+			if s > 0:
+				star_color = COLOR_ACCENT_GOLD
+		elif lv < max_level:
+			# Unlocked but no star data — show 1 star baseline
+			star_str = "⭐☆☆"
+			star_color = COLOR_ACCENT_GOLD
+		elif lv == max_level:
+			# Current level — never played
+			star_str = "NEW"
+			star_color = COLOR_ACCENT_GOLD
+
+		if star_str != "":
+			var star_lbl = Label.new()
+			star_lbl.name = "StarLabel_Lv%d" % lv
+			star_lbl.text = star_str
+			star_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			star_lbl.position = Vector2(cx, cy + btn_size + 2)
+			star_lbl.size = Vector2(btn_size, star_area_h)
+			star_lbl.add_theme_font_size_override("font_size", 14)
+			star_lbl.add_theme_color_override("font_color", star_color)
+			panel.add_child(star_lbl)
+
+	# Back button
+	var back = Button.new()
+	back.text = "← 返回"
+	back.position = Vector2((640 - 200) / 2, 820)
+	back.size = Vector2(200, 50)
+	_make_rounded_button(back, COLOR_BTN_NEUTRAL, RADIUS_MEDIUM)
+	back.pressed.connect(func():
+		_fade_out(level_select)
+		_fade_in(main_menu)
+	)
+	panel.add_child(back)
+
+	add_child(level_select)
+
+func _show_level_select():
+	# Update total score display
+	var score_lbl = level_select.get_node_or_null("Panel/TotalScoreLabel") as Label
+	if score_lbl:
+		score_lbl.text = "总分: %d" % total_score
+
+	# Refresh button states and star labels
+	var panel = level_select.get_node_or_null("Panel")
+	if panel:
+		for child in panel.get_children():
+			if child is Button and child.text.is_valid_int():
+				var lv = child.text.to_int()
+				if lv <= max_level:
+					child.disabled = false
+				else:
+					child.disabled = true
+			# Update star labels
+			if child is Label and child.name.begins_with("StarLabel_Lv"):
+				var lv = child.name.trim_prefix("StarLabel_Lv").to_int()
+				var star_str = ""
+				var star_color = COLOR_TEXT_MUTED
+				if lv <= level_stars.size():
+					var s = level_stars[lv - 1]
+					for j in range(3):
+						star_str += "⭐" if j < s else "☆"
+					if s > 0:
+						star_color = COLOR_ACCENT_GOLD
+				elif lv < max_level:
+					star_str = "⭐☆☆"
+					star_color = COLOR_ACCENT_GOLD
+				elif lv == max_level:
+					star_str = "NEW"
+					star_color = COLOR_ACCENT_GOLD
+				child.text = star_str
+				child.add_theme_color_override("font_color", star_color)
+
+	_fade_in(level_select)
+
+func _on_level_selected(lv: int):
+	_fade_out(level_select, 0.2)
+	await get_tree().create_timer(0.12).timeout
+	_show_game_ui()
+	start_level(lv)
 
 func _hide_game_ui():
 	board_node.visible = false
@@ -885,12 +1225,19 @@ func _hide_game_ui():
 	shuffle_button.visible = false
 	restart_button.visible = false
 	message_label.visible = false
+	selected1_label.visible = false
+	selected2_label.visible = false
+	$UI/Selected1Pill.visible = false
+	$UI/Selected2Pill.visible = false
+	$UI/LevelLabelPill.visible = false
+	$UI/ScoreLabelPill.visible = false
+	$UI/RemainingLabelPill.visible = false
 	win_panel.visible = false
 	$UI/TitleLabel.visible = false
 	settings_menu.visible = false
 	timer_running = false
 	if timer_label:
-		timer_label.visible = false
+		timer_label.get_parent().visible = false
 	# Keep BGM playing continuously (loops in game and menus)
 
 func _show_game_ui():
@@ -901,10 +1248,12 @@ func _show_game_ui():
 	remaining_label.visible = true
 	shuffle_button.visible = true
 	restart_button.visible = true
-	message_label.visible = true
+	$UI/LevelLabelPill.visible = true
+	$UI/ScoreLabelPill.visible = true
+	$UI/RemainingLabelPill.visible = true
 	$UI/TitleLabel.visible = false
 	if timer_label:
-		timer_label.visible = true
+		timer_label.get_parent().visible = true
 	if bgm_player and bgm_player.stream and bgm_enabled and not bgm_player.playing:
 		bgm_player.play()
 
@@ -914,47 +1263,55 @@ func _on_pause_pressed():
 		pause_vol_slider.value = bgm_volume
 	if pause_bgm_check:
 		pause_bgm_check.button_pressed = bgm_enabled
-	pause_menu.visible = true
+	_fade_in(pause_menu)
 	pause_button.visible = false
 
 func _on_resume_pressed():
 	paused = false
-	pause_menu.visible = false
+	_fade_out(pause_menu)
 	pause_button.visible = true
 
 func _on_exit_to_main_pressed():
 	paused = false
-	pause_menu.visible = false
-	settings_menu.visible = false
+	_fade_out(pause_menu)
+	if settings_menu.visible:
+		_fade_out(settings_menu)
+	await get_tree().create_timer(0.15).timeout
 	_hide_game_ui()
 	show_main_menu()
-	# Optional: reset any state
 
 func _on_start_game_pressed():
+	_fade_out(main_menu, 0.25)
+	await get_tree().create_timer(0.15).timeout
 	main_menu.visible = false
-	_show_game_ui()
-	start_level(max_level)  # Continue from highest unlocked level (saved progress)
+	_show_level_select()
 
-func _make_rounded_button(btn: Button, bg_color: Color):
+func _make_rounded_button(btn: Button, bg_color: Color, corner_radius: int = RADIUS_MEDIUM):
 	var normal = StyleBoxFlat.new()
 	normal.bg_color = bg_color
-	normal.corner_radius_top_left = 15
-	normal.corner_radius_top_right = 15
-	normal.corner_radius_bottom_left = 15
-	normal.corner_radius_bottom_right = 15
-	normal.content_margin_left = 12
-	normal.content_margin_right = 12
-	normal.content_margin_top = 8
-	normal.content_margin_bottom = 8
+	normal.set_corner_radius_all(corner_radius)
+	normal.content_margin_left = 16
+	normal.content_margin_right = 16
+	normal.content_margin_top = 10
+	normal.content_margin_bottom = 10
+	normal.shadow_size = SHADOW_SIZE
+	normal.shadow_offset = Vector2(0, SHADOW_OFFSET)
+	normal.shadow_color = Color(0, 0, 0, 0.2)
 	btn.add_theme_stylebox_override("normal", normal)
 
 	var hover = normal.duplicate()
-	hover.bg_color = bg_color.lightened(0.15)
+	hover.bg_color = bg_color.lightened(0.1)
+	hover.shadow_offset = Vector2(0, SHADOW_OFFSET + 1)
 	btn.add_theme_stylebox_override("hover", hover)
 
 	var pressed = normal.duplicate()
-	pressed.bg_color = bg_color.darkened(0.1)
+	pressed.bg_color = bg_color.darkened(0.15)
+	pressed.shadow_offset = Vector2(0, 1)
+	pressed.shadow_size = 2
 	btn.add_theme_stylebox_override("pressed", pressed)
+
+	btn.add_theme_font_size_override("font_size", 24)
+	btn.add_theme_color_override("font_color", COLOR_TEXT_LIGHT)
 
 func _setup_about_dialog():
 	about_dialog = AcceptDialog.new()
@@ -963,15 +1320,23 @@ func _setup_about_dialog():
 	add_child(about_dialog)
 
 func _setup_timer_label():
+	# Timer in a dark pill container
+	var timer_bg = Panel.new()
+	timer_bg.name = "TimerBg"
+	timer_bg.size = Vector2(200, 48)
+	timer_bg.position = Vector2(260, 50)
+	timer_bg.add_theme_stylebox_override("panel", _make_pill_style(Color(COLOR_SURFACE_DARK.r, COLOR_SURFACE_DARK.g, COLOR_SURFACE_DARK.b, 0.85)))
+	$UI.add_child(timer_bg)
+
 	timer_label = Label.new()
 	timer_label.name = "TimerLabel"
 	timer_label.text = "⏱ 00:00"
 	timer_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	timer_label.position = Vector2(260, 80)
-	timer_label.size = Vector2(200, 40)
-	timer_label.add_theme_font_size_override("font_size", 34)
-	timer_label.add_theme_color_override("font_color", Color(0.3, 0.3, 0.3))
-	$UI.add_child(timer_label)
+	timer_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	timer_label.set_anchors_preset(Control.PRESET_FULL_RECT)
+	timer_label.add_theme_font_size_override("font_size", 28)
+	timer_label.add_theme_color_override("font_color", COLOR_TEXT_LIGHT)
+	timer_bg.add_child(timer_label)
 
 func _on_about_pressed():
 	about_dialog.popup_centered()
@@ -1028,25 +1393,19 @@ func _setup_settings_menu():
 	settings_menu = Control.new()
 	settings_menu.set_anchors_preset(Control.PRESET_FULL_RECT)
 
-	# Semi-transparent background
+	# Warm semi-transparent background
 	var bg = ColorRect.new()
-	bg.color = Color(0, 0, 0, 0.6)
+	bg.color = COLOR_OVERLAY
 	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
 	bg.mouse_filter = Control.MOUSE_FILTER_STOP  # block clicks from passing through
 	settings_menu.add_child(bg)
 
-	# Centered rounded panel
+	# Centered rounded panel with unified style
 	var panel = Panel.new()
 	panel.size = Vector2(520, 320)
 	panel.position = Vector2(100, 480)
 	panel.mouse_filter = Control.MOUSE_FILTER_STOP
-	var sett_style = StyleBoxFlat.new()
-	sett_style.bg_color = Color(0.18, 0.2, 0.25, 0.95)
-	sett_style.corner_radius_top_left = 24
-	sett_style.corner_radius_top_right = 24
-	sett_style.corner_radius_bottom_left = 24
-	sett_style.corner_radius_bottom_right = 24
-	panel.add_theme_stylebox_override("panel", sett_style)
+	panel.add_theme_stylebox_override("panel", _make_panel_style())
 	settings_menu.add_child(panel)
 
 	# Title
@@ -1054,7 +1413,7 @@ func _setup_settings_menu():
 	title.text = "设置"
 	title.position = Vector2(50, 25)
 	title.add_theme_font_size_override("font_size", 30)
-	title.add_theme_color_override("font_color", Color(1, 1, 1))
+	title.add_theme_color_override("font_color", COLOR_TEXT_LIGHT)
 	panel.add_child(title)
 
 	# Volume
@@ -1062,7 +1421,7 @@ func _setup_settings_menu():
 	vol_label.text = "背景音乐音量"
 	vol_label.position = Vector2(50, 70)
 	vol_label.add_theme_font_size_override("font_size", 18)
-	vol_label.add_theme_color_override("font_color", Color(0.9, 0.9, 0.9))
+	vol_label.add_theme_color_override("font_color", COLOR_TEXT_MUTED)
 	panel.add_child(vol_label)
 
 	var vol_slider = HSlider.new()
@@ -1082,7 +1441,7 @@ func _setup_settings_menu():
 	bgm_check.position = Vector2(50, 150)
 	bgm_check.button_pressed = bgm_enabled
 	bgm_check.add_theme_font_size_override("font_size", 18)
-	bgm_check.add_theme_color_override("font_color", Color(0.9, 0.9, 0.9))
+	bgm_check.add_theme_color_override("font_color", COLOR_TEXT_MUTED)
 	bgm_check.toggled.connect(_on_bgm_toggled)
 	panel.add_child(bgm_check)
 	settings_bgm_check = bgm_check
@@ -1092,8 +1451,8 @@ func _setup_settings_menu():
 	close.text = "关闭"
 	close.position = Vector2(185, 240)
 	close.size = Vector2(150, 55)
-	_make_rounded_button(close, Color(0.5, 0.5, 0.5))
-	close.pressed.connect(func(): settings_menu.visible = false)
+	_make_rounded_button(close, COLOR_BTN_NEUTRAL, RADIUS_MEDIUM)
+	close.pressed.connect(func(): _fade_out(settings_menu))
 	panel.add_child(close)
 
 	main_menu.add_child(settings_menu)
@@ -1104,7 +1463,7 @@ func _on_settings_pressed():
 		settings_vol_slider.value = bgm_volume
 	if settings_bgm_check:
 		settings_bgm_check.button_pressed = bgm_enabled
-	settings_menu.visible = true
+	_fade_in(settings_menu)
 
 func _on_volume_changed(value: float):
 	bgm_volume = value
@@ -1146,6 +1505,7 @@ func save_player_data():
 	config.set_value("player", "avatar", player_avatar)
 	config.set_value("progress", "max_level", max_level)
 	config.set_value("progress", "total_score", total_score)
+	config.set_value("progress", "level_stars", level_stars)
 	config.set_value("settings", "volume", bgm_volume)
 	config.set_value("settings", "bgm_enabled", bgm_enabled)
 	config.save("user://player_data.cfg")
@@ -1156,7 +1516,15 @@ func load_player_data():
 		player_name = config.get_value("player", "name", "")
 		player_avatar = config.get_value("player", "avatar", 0)
 		max_level = config.get_value("progress", "max_level", 1)
+		level_stars = config.get_value("progress", "level_stars", [])
+		# Backfill: levels completed before star tracking get 1 star (baseline)
+		var backfilled = false
+		while level_stars.size() < max_level - 1:
+			level_stars.append(1)
+			backfilled = true
 		total_score = config.get_value("progress", "total_score", 0)
+		if backfilled:
+			save_player_data()
 		bgm_volume = config.get_value("settings", "volume", 0.7)
 		bgm_enabled = config.get_value("settings", "bgm_enabled", true)
 	else:
@@ -1176,23 +1544,17 @@ func show_profile_creation():
 	profile.set_anchors_preset(Control.PRESET_FULL_RECT)
 
 	var bg = ColorRect.new()
-	bg.color = Color(0.1, 0.1, 0.2, 0.95)
+	bg.color = COLOR_OVERLAY_DEEP
 	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
 	profile.add_child(bg)
 
-	# Rounded centered panel
+	# Rounded centered panel with unified style
 	var panel = Panel.new()
 	var pw := 560
 	var ph := 510
 	panel.size = Vector2(pw, ph)
 	panel.position = Vector2((720 - pw) / 2, (1280 - ph) / 2)
-	var ps = StyleBoxFlat.new()
-	ps.bg_color = Color(0.15, 0.17, 0.22, 0.97)
-	ps.corner_radius_top_left = 24
-	ps.corner_radius_top_right = 24
-	ps.corner_radius_bottom_left = 24
-	ps.corner_radius_bottom_right = 24
-	panel.add_theme_stylebox_override("panel", ps)
+	panel.add_theme_stylebox_override("panel", _make_panel_style())
 	profile.add_child(panel)
 
 	var prompt = Label.new()
@@ -1201,14 +1563,14 @@ func show_profile_creation():
 	prompt.position = Vector2(0, 25)
 	prompt.size = Vector2(pw, 40)
 	prompt.add_theme_font_size_override("font_size", 28)
-	prompt.add_theme_color_override("font_color", Color(1, 1, 1))
+	prompt.add_theme_color_override("font_color", COLOR_TEXT_LIGHT)
 	panel.add_child(prompt)
 
 	var name_label = Label.new()
 	name_label.text = "用户名:"
 	name_label.position = Vector2(40, 78)
 	name_label.add_theme_font_size_override("font_size", 18)
-	name_label.add_theme_color_override("font_color", Color(0.85, 0.85, 0.85))
+	name_label.add_theme_color_override("font_color", COLOR_TEXT_MUTED)
 	panel.add_child(name_label)
 
 	var name_edit = LineEdit.new()
@@ -1222,7 +1584,7 @@ func show_profile_creation():
 	avatar_label.text = "选择头像"
 	avatar_label.position = Vector2(40, 162)
 	avatar_label.add_theme_font_size_override("font_size", 18)
-	avatar_label.add_theme_color_override("font_color", Color(0.85, 0.85, 0.85))
+	avatar_label.add_theme_color_override("font_color", COLOR_TEXT_MUTED)
 	panel.add_child(avatar_label)
 
 	selected_avatar_for_profile = 0
@@ -1258,7 +1620,7 @@ func show_profile_creation():
 	confirm.text = "创建并开始"
 	confirm.position = Vector2((pw - 260) / 2, ph - 65)
 	confirm.size = Vector2(260, 55)
-	_make_rounded_button(confirm, Color(0.3, 0.7, 0.4))
+	_make_rounded_button(confirm, COLOR_BTN_GREEN, RADIUS_MEDIUM)
 	confirm.pressed.connect(func():
 		var nm = name_edit.text.strip_edges()
 		if nm == "":
@@ -1277,6 +1639,7 @@ func show_profile_creation():
 
 func show_main_menu():
 	main_menu.visible = true
+	level_select.visible = false
 	pause_menu.visible = false
 	settings_menu.visible = false
 
@@ -1319,6 +1682,18 @@ func _find_or_create_player_info() -> Control:
 	info.name = "PlayerInfo"
 	info.position = Vector2(safe_left_margin, 15)
 
+	# Subtle semi-transparent background pill behind the player area
+	var info_bg = Panel.new()
+	info_bg.name = "InfoBg"
+	info_bg.size = Vector2(76, 108)
+	info_bg.position = Vector2(-8, -6)
+	info_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var info_bg_style = StyleBoxFlat.new()
+	info_bg_style.bg_color = Color(0.1, 0.06, 0.03, 0.45)
+	info_bg_style.set_corner_radius_all(16)
+	info_bg.add_theme_stylebox_override("panel", info_bg_style)
+	info.add_child(info_bg)
+
 	# Clickable avatar button (click to re-select avatar and edit name)
 	var avatar_btn = Button.new()
 	avatar_btn.size = Vector2(60, 60)
@@ -1337,8 +1712,8 @@ func _find_or_create_player_info() -> Control:
 	nl.position = Vector2(0, 66)
 	nl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	nl.size = Vector2(60, 20)
-	nl.add_theme_font_size_override("font_size", 18)
-	nl.add_theme_color_override("font_color", Color(1, 1, 1))
+	nl.add_theme_font_size_override("font_size", 16)
+	nl.add_theme_color_override("font_color", COLOR_TEXT_LIGHT)
 	info.add_child(nl)
 
 	# Progress info
@@ -1348,14 +1723,27 @@ func _find_or_create_player_info() -> Control:
 	prog.position = Vector2(0, 84)
 	prog.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	prog.size = Vector2(60, 18)
-	prog.add_theme_font_size_override("font_size", 16)
-	prog.add_theme_color_override("font_color", Color(0.9, 0.9, 0.5))
+	prog.add_theme_font_size_override("font_size", 13)
+	prog.add_theme_color_override("font_color", COLOR_ACCENT_GOLD)
 	info.add_child(prog)
 
 	main_menu.add_child(info)
 	return info
 
 func update_progress_on_complete():
+	# Calculate stars for this level completion
+	var pairs = (16 + (level - 1) * 5) / 2
+	var avg_secs_per_pair = elapsed_time / max(pairs, 1)
+	var stars := 1
+	if avg_secs_per_pair <= 3.5:
+		stars = 3
+	elif avg_secs_per_pair <= 7.0:
+		stars = 2
+	# Store stars for this level (keep best)
+	while level_stars.size() < level:
+		level_stars.append(0)
+	var idx = level - 1
+	level_stars[idx] = max(level_stars[idx], stars)
 	max_level = max(max_level, level + 1)
 	total_score += score
 	save_player_data()
@@ -1370,23 +1758,17 @@ func show_edit_profile():
 	profile.set_anchors_preset(Control.PRESET_FULL_RECT)
 
 	var bg = ColorRect.new()
-	bg.color = Color(0.1, 0.1, 0.2, 0.95)
+	bg.color = COLOR_OVERLAY_DEEP
 	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
 	profile.add_child(bg)
 
-	# Rounded centered panel
+	# Rounded centered panel with unified style
 	var panel = Panel.new()
 	var pw := 560
 	var ph := 510
 	panel.size = Vector2(pw, ph)
 	panel.position = Vector2((720 - pw) / 2, (1280 - ph) / 2)
-	var ps = StyleBoxFlat.new()
-	ps.bg_color = Color(0.15, 0.17, 0.22, 0.97)
-	ps.corner_radius_top_left = 24
-	ps.corner_radius_top_right = 24
-	ps.corner_radius_bottom_left = 24
-	ps.corner_radius_bottom_right = 24
-	panel.add_theme_stylebox_override("panel", ps)
+	panel.add_theme_stylebox_override("panel", _make_panel_style())
 	profile.add_child(panel)
 
 	var prompt = Label.new()
@@ -1395,14 +1777,14 @@ func show_edit_profile():
 	prompt.position = Vector2(0, 25)
 	prompt.size = Vector2(pw, 40)
 	prompt.add_theme_font_size_override("font_size", 28)
-	prompt.add_theme_color_override("font_color", Color(1, 1, 1))
+	prompt.add_theme_color_override("font_color", COLOR_TEXT_LIGHT)
 	panel.add_child(prompt)
 
 	var name_label = Label.new()
 	name_label.text = "用户名:"
 	name_label.position = Vector2(40, 78)
 	name_label.add_theme_font_size_override("font_size", 18)
-	name_label.add_theme_color_override("font_color", Color(0.85, 0.85, 0.85))
+	name_label.add_theme_color_override("font_color", COLOR_TEXT_MUTED)
 	panel.add_child(name_label)
 
 	var name_edit = LineEdit.new()
@@ -1417,7 +1799,7 @@ func show_edit_profile():
 	avatar_label.text = "选择头像"
 	avatar_label.position = Vector2(40, 162)
 	avatar_label.add_theme_font_size_override("font_size", 18)
-	avatar_label.add_theme_color_override("font_color", Color(0.85, 0.85, 0.85))
+	avatar_label.add_theme_color_override("font_color", COLOR_TEXT_MUTED)
 	panel.add_child(avatar_label)
 
 	var selected_av = player_avatar
@@ -1456,7 +1838,7 @@ func show_edit_profile():
 	confirm.text = "保存修改"
 	confirm.position = Vector2((pw - 260) / 2, ph - 65)
 	confirm.size = Vector2(260, 55)
-	_make_rounded_button(confirm, Color(0.3, 0.7, 0.4))
+	_make_rounded_button(confirm, COLOR_BTN_GREEN, RADIUS_MEDIUM)
 	confirm.pressed.connect(func():
 		var nm = name_edit.text.strip_edges()
 		if nm == "":
