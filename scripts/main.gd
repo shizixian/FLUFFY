@@ -1034,7 +1034,7 @@ func _setup_main_menu():
 
 	# Version / About — subtle text link at bottom of card
 	var about_btn = Button.new()
-	about_btn.text = "关于 · v0.2.0"
+	about_btn.text = "关于 · v0.2.1"
 	about_btn.position = Vector2(140, 340)
 	about_btn.size = Vector2(200, 42)
 	about_btn.flat = true
