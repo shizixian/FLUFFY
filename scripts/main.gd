@@ -317,6 +317,24 @@ var settings_vol_slider: HSlider
 var pause_bgm_check: CheckBox
 var settings_bgm_check: CheckBox
 
+# Language refresh references
+var _r_menu_title: Label
+var _r_menu_subtitle: Label
+var _r_menu_start: Button
+var _r_menu_settings: Button
+var _r_menu_quit: Button
+var _r_menu_about: Button
+var _r_settings_title: Label
+var _r_settings_vol_label: Label
+var _r_settings_close: Button
+var _r_pause_title: Label
+var _r_pause_resume: Button
+var _r_pause_exit: Button
+var _r_pause_vol_label: Label
+var _r_level_select_title: Label
+var _r_level_select_total: Label
+var _r_level_select_back: Button
+
 # Player profile and progress
 var player_name := ""
 var player_avatar := 0  # 0-5 corresponding to icon_textures
@@ -1164,6 +1182,7 @@ func _setup_main_menu():
 	title_label.position = Vector2(0, 6)
 	title_label.add_theme_font_size_override("font_size", 48)
 	title_label.add_theme_color_override("font_color", COLOR_TEXT_GOLD)
+	_r_menu_title = title_label
 	title_banner.add_child(title_label)
 
 	var subtitle_label = Label.new()
@@ -1173,6 +1192,7 @@ func _setup_main_menu():
 	subtitle_label.position = Vector2(0, 72)
 	subtitle_label.add_theme_font_size_override("font_size", 16)
 	subtitle_label.add_theme_color_override("font_color", COLOR_TEXT_MUTED)
+	_r_menu_subtitle = subtitle_label
 	title_banner.add_child(subtitle_label)
 
 	# Button card — centered panel containing all action buttons
@@ -1195,6 +1215,7 @@ func _setup_main_menu():
 	start.position = Vector2(40, 35)
 	start.size = Vector2(400, 80)
 	start.pressed.connect(_on_start_game_pressed)
+	_r_menu_start = start
 	_make_rounded_button(start, COLOR_BTN_GREEN, RADIUS_PILL)
 	btn_card.add_child(start)
 	start.name = "StartContinueBtn"
@@ -1204,6 +1225,7 @@ func _setup_main_menu():
 	settings_btn.position = Vector2(40, 135)
 	settings_btn.size = Vector2(400, 70)
 	settings_btn.pressed.connect(_on_settings_pressed)
+	_r_menu_settings = settings_btn
 	_make_rounded_button(settings_btn, COLOR_BTN_BLUE, RADIUS_MEDIUM)
 	btn_card.add_child(settings_btn)
 
@@ -1213,6 +1235,7 @@ func _setup_main_menu():
 	quit.position = Vector2(40, 225)
 	quit.size = Vector2(400, 70)
 	quit.pressed.connect(func(): get_tree().quit())
+	_r_menu_quit = quit
 	_make_rounded_button(quit, COLOR_BTN_RED, RADIUS_MEDIUM)
 	btn_card.add_child(quit)
 
@@ -1226,6 +1249,7 @@ func _setup_main_menu():
 	about_btn.add_theme_color_override("font_color", COLOR_TEXT_MUTED)
 	about_btn.add_theme_color_override("font_hover_color", COLOR_TEXT_GOLD)
 	about_btn.pressed.connect(_on_about_pressed)
+	_r_menu_about = about_btn
 	btn_card.add_child(about_btn)
 
 	add_child(main_menu)
@@ -1252,6 +1276,7 @@ func _setup_level_select():
 	# Title
 	var title = Label.new()
 	title.text = _t("select_level")
+	_r_level_select_title = title
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.position = Vector2(0, 20)
 	title.size = Vector2(640, 44)
@@ -1345,6 +1370,7 @@ func _setup_level_select():
 	# Back button
 	var back = Button.new()
 	back.text = _t("btn_back")
+	_r_level_select_back = back
 	back.position = Vector2((640 - 200) / 2, 820)
 	back.size = Vector2(200, 50)
 	_make_rounded_button(back, COLOR_BTN_NEUTRAL, RADIUS_MEDIUM)
@@ -1599,6 +1625,7 @@ func _setup_settings_menu():
 	# Title
 	var title = Label.new()
 	title.text = _t("settings_title")
+	_r_settings_title = title
 	title.position = Vector2(50, 25)
 	title.add_theme_font_size_override("font_size", 30)
 	title.add_theme_color_override("font_color", COLOR_TEXT_LIGHT)
@@ -1719,15 +1746,34 @@ func _refresh_language() -> void:
 	if lang_selector_pause:
 		lang_selector_pause.select(LANG_LIST.find(current_lang))
 
-	# Main menu — re-call show_main_menu() which refreshes all text
-	if main_menu and main_menu.visible:
-		show_main_menu()
+	# Main menu — update all text elements
+	if _r_menu_title:     _r_menu_title.text = _t("game_title")
+	if _r_menu_subtitle:  _r_menu_subtitle.text = _t("game_subtitle")
+	if _r_menu_start:     _r_menu_start.text = _t("btn_continue") if max_level > 1 else _t("btn_start")
+	if _r_menu_settings:  _r_menu_settings.text = _t("btn_settings")
+	if _r_menu_quit:      _r_menu_quit.text = _t("btn_quit")
+	if _r_menu_about:     _r_menu_about.text = _t("btn_about")
+
+	# Settings menu
+	if _r_settings_title:     _r_settings_title.text = _t("settings_title")
+	if _r_settings_vol_label: _r_settings_vol_label.text = _t("settings_volume")
+	if settings_bgm_check:    settings_bgm_check.text = _t("settings_bgm")
+	if _r_settings_close:     _r_settings_close.text = _t("btn_close")
+
+	# Pause menu
+	if _r_pause_title:     _r_pause_title.text = _t("pause_title")
+	if _r_pause_resume:    _r_pause_resume.text = _t("btn_resume")
+	if _r_pause_exit:      _r_pause_exit.text = _t("btn_exit_main")
+	if _r_pause_vol_label: _r_pause_vol_label.text = _t("settings_volume")
+	if pause_bgm_check:    pause_bgm_check.text = _t("settings_bgm")
 
 	# Level select
+	if _r_level_select_title: _r_level_select_title.text = _t("select_level")
+	if _r_level_select_back:  _r_level_select_back.text = _t("btn_back")
 	if level_select and level_select.visible:
-		_show_level_select()
+		_show_level_select()  # re-runs stars/text updates with _t()
 
-	# Game HUD (re-call update functions which use tr())
+	# Game HUD (re-call update functions which use _t())
 	update_ui()
 	update_selected_ui()
 	_update_timer_display()
@@ -1737,7 +1783,7 @@ func _refresh_language() -> void:
 		about_dialog.title = _t("about_title")
 		about_dialog.dialog_text = _t("about_text")
 
-	# Player info level label on main menu
+	# Player info on main menu
 	if main_menu:
 		var info = main_menu.get_node_or_null("PlayerInfo") as Control
 		if info and info.visible:
