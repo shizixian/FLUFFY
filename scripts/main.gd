@@ -48,7 +48,7 @@ const LOCALE = {
 		"game_subtitle": "可爱配对消除 · 休闲小游戏",
 		"btn_start": "开始游戏", "btn_continue": "继续游戏",
 		"btn_settings": "设置", "btn_quit": "退出游戏",
-		"btn_about": "关于 · v0.3.3", "btn_close": "关闭",
+		"btn_about": "关于 · v0.3.4", "btn_close": "关闭",
 		"btn_shuffle": "洗牌", "btn_restart": "重来",
 		"btn_pause": "⏸ 暂停", "btn_next": "下一关",
 		"btn_resume": "继续游戏", "btn_exit_main": "退出至主页",
@@ -92,7 +92,7 @@ const LOCALE = {
 		"game_subtitle": "可愛配對消除 · 休閒小遊戲",
 		"btn_start": "開始遊戲", "btn_continue": "繼續遊戲",
 		"btn_settings": "設定", "btn_quit": "退出遊戲",
-		"btn_about": "關於 · v0.3.3", "btn_close": "關閉",
+		"btn_about": "關於 · v0.3.4", "btn_close": "關閉",
 		"btn_shuffle": "洗牌", "btn_restart": "重來",
 		"btn_pause": "⏸ 暫停", "btn_next": "下一關",
 		"btn_resume": "繼續遊戲", "btn_exit_main": "退出至主頁",
@@ -136,7 +136,7 @@ const LOCALE = {
 		"game_subtitle": "Cute Matching Puzzle · Casual Game",
 		"btn_start": "Start", "btn_continue": "Continue",
 		"btn_settings": "Settings", "btn_quit": "Quit",
-		"btn_about": "About · v0.3.3", "btn_close": "Close",
+		"btn_about": "About · v0.3.4", "btn_close": "Close",
 		"btn_shuffle": "Shuffle", "btn_restart": "Restart",
 		"btn_pause": "⏸ Pause", "btn_next": "Next",
 		"btn_resume": "Continue", "btn_exit_main": "Exit to Menu",
@@ -1016,11 +1016,8 @@ func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel"):
 		get_viewport().set_input_as_handled()
 		if level_select.visible:
-			_fade_out(level_select)
+			level_select.visible = false
 			show_main_menu()
-			main_menu.modulate.a = 0.0
-			var t = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
-			t.tween_property(main_menu, "modulate:a", 1.0, 0.2)
 		elif pause_menu.visible:
 			_on_resume_pressed()
 		elif settings_menu.visible:
@@ -1381,12 +1378,8 @@ func _setup_level_select():
 	back.size = Vector2(200, 50)
 	_make_rounded_button(back, COLOR_BTN_NEUTRAL, RADIUS_MEDIUM)
 	back.pressed.connect(func():
-		_fade_out(level_select)
-		show_main_menu()
-		main_menu.modulate.a = 0.0
-		var tb = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
-		tb.tween_property(main_menu, "modulate:a", 1.0, 0.2)
-	)
+			level_select.visible = false
+			show_main_menu()	)
 	panel.add_child(back)
 
 	add_child(level_select)
