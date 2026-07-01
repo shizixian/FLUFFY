@@ -2,6 +2,8 @@
 
 A cute casual tile-matching puzzle game built with Godot 4.6.
 
+🌐 **[fluffy-idj.pages.dev](https://fluffy-idj.pages.dev)**
+
 ## Gameplay
 
 - Tap uncovered (free) tiles
