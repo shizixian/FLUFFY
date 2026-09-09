@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FLUFFY 🐑 可爱消除小游戏 | Cute Matching Puzzle</title>
+<meta name="description" content="FLUFFY 是一款可爱休闲的消消乐小游戏：点开未遮挡的牌，找出两张相同的，清空棋盘获胜。免费无广告，离线畅玩，支持中英繁三种语言。">
+<meta property="og:title" content="FLUFFY — 可爱消除小游戏">
+<meta property="og:description" content="Match, Clear, and Relax 🐑 免费无广告的可爱消除游戏，Android 下载。">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://fluffy-idj.pages.dev/screenshot_menu.png">
+<meta property="og:url" content="https://fluffy-idj.pages.dev">
+<meta name="theme-color" content="#4A3028">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
+<style>
+/* ═══ 主题变量 ═══ */
+:root {
+  color-scheme: light;
+  --bg: #FFF8F0;
+  --bg-2: #FDEBD0;
+  --bg-3: #FCE4B8;
+  --card: #FFFFFF;
+  --ink: #4A3028;
+  --ink-2: rgba(74, 48, 40, 0.68);
+  --ink-3: rgba(74, 48, 40, 0.45);
+  --accent: #F0B823;
+  --accent-deep: #E8A20C;
+  --accent-soft: rgba(240, 184, 35, 0.14);
+  --tile-indigo: #5C6BC0;
+  --tile-pink: #F582A7;
+  --tile-green: #7BC47F;
+  --tile-orange: #FFB74D;
+  --line: rgba(74, 48, 40, 0.10);
+  --shadow: 0 8px 30px rgba(74, 48, 40, 0.10);
+  --shadow-big: 0 24px 60px rgba(74, 48, 40, 0.18);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #211512;
+    --bg-2: #2A1B15;
+    --bg-3: #33211A;
+    --card: #31201A;
+    --ink: #F5E9DC;
+    --ink-2: rgba(245, 233, 220, 0.68);
+    --ink-3: rgba(245, 233, 220, 0.45);
+    --accent-soft: rgba(240, 184, 35, 0.16);
+    --line: rgba(245, 233, 220, 0.12);
+    --shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+    --shadow-big: 0 24px 60px rgba(0, 0, 0, 0.5);
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #211512;
+  --bg-2: #2A1B15;
+  --bg-3: #33211A;
+  --card: #31201A;
+  --ink: #F5E9DC;
+  --ink-2: rgba(245, 233, 220, 0.68);
+  --ink-3: rgba(245, 233, 220, 0.45);
+  --accent-soft: rgba(240, 184, 35, 0.16);
+  --line: rgba(245, 233, 220, 0.12);
+  --shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+  --shadow-big: 0 24px 60px rgba(0, 0, 0, 0.5);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: system-ui, -apple-system, "PingFang SC", "Hiragino Sans GB",
+               "Microsoft YaHei", "Segoe UI", sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  line-height: 1.6;
+  overflow-x: hidden;
+  transition: background 0.3s ease, color 0.3s ease;
+}
+.font-display { font-family: "Baloo 2", "ZCOOL KuaiLe", system-ui, sans-serif; }
+.container { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+a { color: inherit; }
+
+/* ═══ 顶部导航 ═══ */
+.nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+  background: rgba(255, 248, 240, 0.8);
+  background: color-mix(in srgb, var(--bg) 78%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--line);
+}
+.nav-inner {
+  max-width: 1120px; margin: 0 auto; padding: 12px 24px;
+  display: flex; align-items: center; gap: 20px;
+}
+.logo { display: flex; align-items: center; gap: 8px; text-decoration: none; font-weight: 800; font-size: 20px; }
+.logo .mark {
+  width: 30px; height: 30px; border-radius: 8px; background: var(--tile-indigo);
+  display: inline-flex; align-items: center; justify-content: center; font-size: 17px;
+}
+.nav-links { display: flex; gap: 22px; margin-left: auto; }
+.nav-links a { text-decoration: none; font-size: 14px; font-weight: 600; color: var(--ink-2); transition: color .2s; }
+.nav-links a:hover { color: var(--ink); }
+.lang-btn {
+  border: 1px solid var(--line); background: var(--card); color: var(--ink);
+  border-radius: 999px; padding: 6px 14px; font-size: 13px; font-weight: 700;
+  cursor: pointer; transition: border-color .2s, transform .15s;
+}
+.lang-btn:hover { border-color: var(--accent); transform: translateY(-1px); }
+.gh-btn { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600;
+  text-decoration: none; color: var(--ink-2); border: 1px solid var(--line);
+  border-radius: 999px; padding: 6px 14px; background: var(--card); transition: border-color .2s; }
+.gh-btn:hover { border-color: var(--accent); color: var(--ink); }
+@media (max-width: 760px) { .nav-links { display: none; } }
+@media (max-width: 900px) {
+  .hero-grid { grid-template-columns: 1fr; gap: 56px; }
+  .hero { padding: 130px 0 90px; }
+  .ft-1, .ft-2 { display: none; }
+}
+
+/* ═══ 按钮 ═══ */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  padding: 15px 34px; border-radius: 999px; font-size: 16px; font-weight: 700;
+  text-decoration: none; cursor: pointer; border: none;
+  transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
+}
+.btn-gold {
+  background: linear-gradient(180deg, #F7C948, var(--accent-deep));
+  color: #4A3028;
+  box-shadow: 0 6px 22px rgba(232, 162, 12, 0.38);
+}
+.btn-gold:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(232, 162, 12, 0.5); }
+.btn-ghost {
+  background: var(--card); color: var(--ink);
+  border: 1.5px solid var(--line);
+}
+.btn-ghost:hover { transform: translateY(-2px); border-color: var(--accent); }
+.btn .ver {
+  font-size: 12px; font-weight: 700; background: rgba(74, 48, 40, 0.14);
+  border-radius: 999px; padding: 2px 10px;
+}
+
+/* ═══ Hero ═══ */
+.hero {
+  position: relative; overflow: hidden;
+  padding: 150px 0 110px;
+  background: linear-gradient(160deg, var(--bg) 0%, var(--bg-2) 55%, var(--bg-3) 100%);
+}
+.hero-blob { position: absolute; border-radius: 50%; filter: blur(70px); pointer-events: none; }
+.blob-a { width: 420px; height: 420px; top: -120px; right: -80px; background: rgba(240, 184, 35, 0.16); }
+.blob-b { width: 360px; height: 360px; bottom: -140px; left: -100px; background: rgba(92, 107, 192, 0.12); }
+.hero-grid {
+  position: relative; z-index: 2;
+  display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 48px; align-items: center;
+}
+.eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--accent-soft); color: var(--accent-deep);
+  font-size: 13px; font-weight: 800; letter-spacing: 0.12em;
+  border-radius: 999px; padding: 7px 16px; margin-bottom: 22px;
+}
+h1 {
+  font-family: "Baloo 2", "ZCOOL KuaiLe", system-ui, sans-serif;
+  font-size: clamp(44px, 6vw, 68px); font-weight: 800; line-height: 1.12;
+  margin-bottom: 18px;
+}
+h1 .hl { color: var(--accent-deep); }
+.hero .sub { font-size: 17px; color: var(--ink-2); max-width: 480px; margin-bottom: 32px; }
+.hero-cta { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 26px; }
+.hero-badges { display: flex; gap: 18px; flex-wrap: wrap; color: var(--ink-3); font-size: 13px; font-weight: 600; }
+.hero-badges span { display: inline-flex; align-items: center; gap: 6px; }
+
+/* 手机模型 */
+.phone-stage { position: relative; z-index: 2; display: flex; justify-content: center; }
+.phone {
+  position: relative;
+  width: min(280px, 66vw);
+  border-radius: 40px;
+  background: #2B1B16;
+  padding: 12px;
+  box-shadow: var(--shadow-big), inset 0 0 0 3px rgba(255, 255, 255, 0.06);
+  transform: rotate(2.5deg);
+  animation: phone-in 1s cubic-bezier(.2,.8,.25,1) both;
+}
+.phone::before { /* 刘海 */
+  content: ""; position: absolute; top: 22px; left: 50%; transform: translateX(-50%);
+  width: 76px; height: 22px; background: #2B1B16; border-radius: 999px; z-index: 3;
+}
+.phone-screen { border-radius: 30px; overflow: hidden; background: var(--bg-2); }
+.phone-screen img { display: block; width: 100%; height: auto; }
+@keyframes phone-in {
+  from { opacity: 0; transform: translateY(40px) rotate(8deg); }
+  to   { opacity: 1; transform: translateY(0) rotate(2.5deg); }
+}
+
+/* 漂浮方块 */
+.float-tile {
+  position: absolute; z-index: 3; display: flex; align-items: center; justify-content: center;
+  width: 54px; height: 54px; border-radius: 14px; font-size: 26px;
+  box-shadow: 0 10px 24px rgba(74, 48, 40, 0.22);
+  animation: floaty 7s ease-in-out infinite;
+}
+.ft-1 { top: 6%; right: 4%;  background: var(--tile-pink);   animation-delay: 0s; }
+.ft-2 { top: 26%; right: -3%; background: var(--tile-indigo); animation-delay: -2.2s; }
+.ft-3 { bottom: 22%; right: 2%; background: var(--tile-green); animation-delay: -4.1s; }
+.ft-4 { bottom: 8%; right: 14%; background: var(--tile-orange); animation-delay: -1.4s; }
+.ft-5 { top: 40%; right: 10%; background: var(--accent); animation-delay: -5.6s; width: 42px; height: 42px; font-size: 20px; border-radius: 12px; }
+@keyframes floaty {
+  0%, 100% { transform: translateY(0) rotate(-6deg); }
+  50%      { transform: translateY(-16px) rotate(7deg); }
+}
+
+/* Hero 入场 */
+.hero-in { animation: rise .8s cubic-bezier(.2,.8,.25,1) both; }
+.hero-in.d1 { animation-delay: .08s; }
+.hero-in.d2 { animation-delay: .18s; }
+.hero-in.d3 { animation-delay: .3s; }
+.hero-in.d4 { animation-delay: .42s; }
+@keyframes rise { from { opacity: 0; transform: translateY(26px); } to { opacity: 1; transform: none; } }
+
+/* ═══ 快速事实条 ═══ */
+.strip { border-block: 1px solid var(--line); background: var(--card); }
+.strip-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  padding: 26px 0; text-align: center;
+}
+.strip-item { display: flex; flex-direction: column; gap: 2px; }
+.strip-item .si-emoji { font-size: 22px; }
+.strip-item .si-label { font-size: 13px; font-weight: 700; color: var(--ink-2); }
+@media (max-width: 760px) { .strip-grid { grid-template-columns: repeat(2, 1fr); gap: 18px 0; } }
+
+/* ═══ 通用 section ═══ */
+.section { padding: 96px 0; }
+.section-alt { background: var(--card); border-block: 1px solid var(--line); }
+.sec-head { text-align: center; max-width: 560px; margin: 0 auto 56px; }
+.sec-head h2 {
+  font-family: "Baloo 2", "ZCOOL KuaiLe", system-ui, sans-serif;
+  font-size: clamp(30px, 4.6vw, 44px); font-weight: 800; margin-bottom: 12px;
+}
+.sec-head p { color: var(--ink-2); font-size: 16px; }
+
+/* ═══ 玩法 ═══ */
+.steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+.step {
+  position: relative; background: var(--card); border: 1px solid var(--line);
+  border-radius: 22px; padding: 32px 26px; text-align: center;
+  transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease;
+}
+.step:hover { transform: translateY(-6px); border-color: var(--accent); box-shadow: var(--shadow); }
+.step .num {
+  position: absolute; top: 18px; right: 22px;
+  font-family: "Baloo 2", sans-serif; font-weight: 800; font-size: 40px;
+  color: var(--ink-3); opacity: 0.55; line-height: 1;
+}
+.step .emoji {
+  width: 64px; height: 64px; margin: 0 auto 18px; border-radius: 18px;
+  display: flex; align-items: center; justify-content: center; font-size: 30px;
+  background: var(--accent-soft);
+}
+.step h3 { font-size: 19px; font-weight: 800; margin-bottom: 8px; }
+.step p { font-size: 14.5px; color: var(--ink-2); }
+@media (max-width: 860px) { .steps { grid-template-columns: 1fr; } }
+
+/* ═══ 特性 ═══ */
+.feature-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+.feature {
+  background: var(--card); border: 1px solid var(--line);
+  border-radius: 22px; padding: 28px 24px;
+  transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease;
+}
+.feature:hover { transform: translateY(-6px); border-color: var(--accent); box-shadow: var(--shadow); }
+.feature .f-emoji { font-size: 28px; margin-bottom: 14px; display: block; }
+.feature h3 { font-size: 18px; font-weight: 800; margin-bottom: 8px; }
+.feature p { font-size: 14.5px; color: var(--ink-2); }
+@media (max-width: 900px) { .feature-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 600px) { .feature-grid { grid-template-columns: 1fr; } }
+
+/* ═══ 截图 ═══ */
+.shots-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 40px; max-width: 760px; margin: 0 auto; }
+.shot { text-align: center; }
+.shot .phone-mini {
+  width: min(240px, 56vw); margin: 0 auto 18px; border-radius: 34px;
+  background: #2B1B16; padding: 10px; transform: rotate(-2deg);
+  box-shadow: var(--shadow-big), inset 0 0 0 3px rgba(255, 255, 255, 0.06);
+  transition: transform .3s ease;
+}
+.shot:nth-child(2) .phone-mini { transform: rotate(2deg); }
+.shot .phone-mini:hover { transform: rotate(0) scale(1.04); }
+.shot .phone-mini img { display: block; width: 100%; border-radius: 26px; }
+.shot .cap { font-weight: 800; font-size: 16px; }
+.shot .cap-sub { color: var(--ink-3); font-size: 13.5px; margin-top: 2px; }
+@media (max-width: 640px) { .shots-grid { grid-template-columns: 1fr; gap: 48px; } }
+
+/* ═══ 下载 CTA ═══ */
+.cta {
+  position: relative; overflow: hidden; text-align: center;
+  padding: 110px 24px;
+  background: linear-gradient(160deg, #4A3028, #33211A);
+  color: #F5E9DC;
+}
+.cta::before {
+  content: ""; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  width: 620px; height: 620px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(240, 184, 35, 0.18) 0%, transparent 70%);
+}
+.cta .inner { position: relative; z-index: 1; }
+.cta h2 {
+  font-family: "Baloo 2", "ZCOOL KuaiLe", system-ui, sans-serif;
+  font-size: clamp(30px, 5vw, 46px); font-weight: 800; margin-bottom: 14px;
+}
+.cta p { color: rgba(245, 233, 220, 0.75); font-size: 16px; max-width: 460px; margin: 0 auto 34px; }
+.cta .btn-gold { font-size: 17px; padding: 17px 42px; }
+.cta .hint { margin-top: 20px; font-size: 13px; color: rgba(245, 233, 220, 0.5); }
+.cta .hint a { color: var(--accent); text-decoration: none; font-weight: 700; }
+
+/* ═══ Footer ═══ */
+footer { padding: 40px 24px; text-align: center; font-size: 13.5px; color: var(--ink-3); background: var(--bg); }
+footer a { color: var(--ink-2); font-weight: 700; text-decoration: none; }
+footer a:hover { color: var(--accent-deep); }
+footer .heart { color: var(--tile-pink); }
+
+/* ═══ 滚动显现 ═══ */
+.reveal { opacity: 0; transform: translateY(28px);
+  transition: opacity .7s ease, transform .7s ease; }
+.reveal.in { opacity: 1; transform: none; }
+.reveal.d1 { transition-delay: .08s; }
+.reveal.d2 { transition-delay: .16s; }
+.reveal.d3 { transition-delay: .24s; }
+@media (prefers-reduced-motion: reduce) {
+  .reveal, .hero-in, .float-tile, .phone { animation: none !important; transition: none !important; opacity: 1 !important; transform: none !important; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ 导航 ═══ -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="logo" href="#top"><span class="mark">🐑</span><span class="font-display">FLUFFY</span></a>
+    <div class="nav-links">
+      <a href="#play" data-i18n="nav-play">玩法</a>
+      <a href="#features" data-i18n="nav-features">特性</a>
+      <a href="#shots" data-i18n="nav-shots">截图</a>
+      <a href="#download" data-i18n="nav-download">下载</a>
+    </div>
+    <button class="lang-btn" id="lang-btn" type="button">EN</button>
+    <a class="gh-btn" href="https://github.com/shizixian/FLUFFY" target="_blank" rel="noopener">
+      <svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+      <span data-i18n="nav-github">GitHub</span>
+    </a>
+  </div>
+</nav>
+
+<!-- ═══ HERO ═══ -->
+<section class="hero" id="top">
+  <div class="hero-blob blob-a"></div>
+  <div class="hero-blob blob-b"></div>
+  <div class="float-tile ft-1">🍓</div>
+  <div class="float-tile ft-2">🍋</div>
+  <div class="float-tile ft-3">🍇</div>
+  <div class="float-tile ft-4">🐑</div>
+  <div class="float-tile ft-5">⭐</div>
+  <div class="container hero-grid">
+    <div>
+      <p class="eyebrow hero-in d1">🐑 <span data-i18n="hero-eyebrow">可爱休闲 · 消消乐</span></p>
+      <h1 class="hero-in d2"><span data-i18n="hero-title-1">点开、配对、</span><br><span class="hl" data-i18n="hero-title-2">清空烦恼</span></h1>
+      <p class="sub hero-in d3" data-i18n="hero-sub">
+        一款为手机而生的可爱消除小游戏。点开未遮挡的牌，找出两张相同的，
+        清空棋盘获胜 —— 简单、解压、一玩就停不下来。
+      </p>
+      <div class="hero-cta hero-in d3">
+        <a class="btn btn-gold" href="https://github.com/shizixian/FLUFFY/releases/latest">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <span data-i18n="hero-download">免费下载 Android</span><span class="ver" id="ver-badge">APK</span>
+        </a>
+        <a class="btn btn-ghost" href="https://github.com/shizixian/FLUFFY" target="_blank" rel="noopener" data-i18n="hero-github">查看源码</a>
+      </div>
+      <div class="hero-badges hero-in d4">
+        <span>💛 <span data-i18n="badge-free">免费 · 无广告</span></span>
+        <span>✈️ <span data-i18n="badge-offline">离线畅玩</span></span>
+        <span>🌍 <span data-i18n="badge-lang">中 / 繁 / EN</span></span>
+      </div>
+    </div>
+    <div class="phone-stage">
+      <div class="phone">
+        <div class="phone-screen"><img src="screenshot_menu_small.png" alt="FLUFFY 主菜单" width="480" height="856"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 快速事实条 ═══ -->
+<section class="strip">
+  <div class="container strip-grid">
+    <div class="strip-item"><span class="si-emoji">🌍</span><span class="si-label" data-i18n="strip-lang">简体 / 繁體 / English</span></div>
+    <div class="strip-item"><span class="si-emoji">⭐</span><span class="si-label" data-i18n="strip-stars">三星评分系统</span></div>
+    <div class="strip-item"><span class="si-emoji">🧩</span><span class="si-label" data-i18n="strip-solvable">每局保证可解</span></div>
+    <div class="strip-item"><span class="si-emoji">💛</span><span class="si-label" data-i18n="strip-free">免费无广告</span></div>
+  </div>
+</section>
+
+<!-- ═══ 玩法 ═══ -->
+<section class="section" id="play">
+  <div class="container">
+    <div class="sec-head reveal">
+      <h2 data-i18n="play-title">三步上手</h2>
+      <p data-i18n="play-sub">规则简单到一看就会，玩起来却停不下来。</p>
+    </div>
+    <div class="steps">
+      <div class="step reveal d1">
+        <span class="num">1</span>
+        <div class="emoji">👆</div>
+        <h3 data-i18n="play-s1-t">点开未遮挡的牌</h3>
+        <p data-i18n="play-s1-p">只有没被压住的牌才能点开，选牌前先观察整个棋盘。</p>
+      </div>
+      <div class="step reveal d2">
+        <span class="num">2</span>
+        <div class="emoji">🔍</div>
+        <h3 data-i18n="play-s2-t">找出两张相同</h3>
+        <p data-i18n="play-s2-p">选中两张相同的牌即可消除，配错也没关系，换一对再试。</p>
+      </div>
+      <div class="step reveal d3">
+        <span class="num">3</span>
+        <div class="emoji">🏆</div>
+        <h3 data-i18n="play-s3-t">清空棋盘获胜</h3>
+        <p data-i18n="play-s3-p">越快清空星级越高，重玩关卡刷新你的最佳纪录。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 特性 ═══ -->
+<section class="section section-alt" id="features">
+  <div class="container">
+    <div class="sec-head reveal">
+      <h2 data-i18n="feat-title">为什么你会爱上它</h2>
+      <p data-i18n="feat-sub">简单易上手，进阶有挑战 —— 完美的五分钟放松。</p>
+    </div>
+    <div class="feature-grid">
+      <div class="feature reveal"><span class="f-emoji">📈</span><h3 data-i18n="feat-1-t">渐进式难度</h3><p data-i18n="feat-1-p">从简单开始逐步加码：更多牌、更深层叠、更巧妙的布局，但永远不会不公平。</p></div>
+      <div class="feature reveal d1"><span class="f-emoji">⭐</span><h3 data-i18n="feat-2-t">三星评价系统</h3><p data-i18n="feat-2-p">每对牌 3.5 秒内消除拿满三星，重玩关卡挑战自己的最佳时间。</p></div>
+      <div class="feature reveal d2"><span class="f-emoji">🌍</span><h3 data-i18n="feat-3-t">三种语言</h3><p data-i18n="feat-3-p">简体中文、繁体中文、English，随时在设置里一键切换。</p></div>
+      <div class="feature reveal"><span class="f-emoji">✅</span><h3 data-i18n="feat-4-t">每局保证可解</h3><p data-i18n="feat-4-p">棋盘由逆向成对生成，保证一定有解 —— 没有死局，只有纯粹的快乐。</p></div>
+      <div class="feature reveal d1"><span class="f-emoji">⏱️</span><h3 data-i18n="feat-5-t">限时关卡</h3><p data-i18n="feat-5-p">和时间赛跑拿时间奖励，消除越快分数越高。</p></div>
+      <div class="feature reveal d2"><span class="f-emoji">✈️</span><h3 data-i18n="feat-6-t">离线畅玩</h3><p data-i18n="feat-6-p">无需网络。地铁上、飞机上，想玩就玩。</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 截图 ═══ -->
+<section class="section" id="shots">
+  <div class="container">
+    <div class="sec-head reveal">
+      <h2 data-i18n="shots-title">看看它有多可爱</h2>
+      <p data-i18n="shots-sub">温暖、精致、软萌 —— 为手机竖屏而生。</p>
+    </div>
+    <div class="shots-grid">
+      <div class="shot reveal d1">
+        <div class="phone-mini"><img src="screenshot_menu_small.png" alt="FLUFFY 主菜单截图" loading="lazy" width="480" height="856"></div>
+        <div class="cap" data-i18n="shots-1-cap">主菜单</div>
+        <div class="cap-sub" data-i18n="shots-1-sub">选头像、看星级、开始消除</div>
+      </div>
+      <div class="shot reveal d2">
+        <div class="phone-mini"><img src="screenshot_game_small.png" alt="FLUFFY 游戏画面截图" loading="lazy" width="480" height="856"></div>
+        <div class="cap" data-i18n="shots-2-cap">游戏画面</div>
+        <div class="cap-sub" data-i18n="shots-2-sub">彩色层叠棋盘 + 计时 + 星级</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 下载 CTA ═══ -->
+<section class="cta" id="download">
+  <div class="inner">
+    <h2 data-i18n="cta-title">准备好开玩了吗？</h2>
+    <p data-i18n="cta-sub">下载 FLUFFY，开始消除吧。免费、无广告、只有好心情。</p>
+    <a class="btn btn-gold" href="https://github.com/shizixian/FLUFFY/releases/latest">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      <span data-i18n="cta-btn">立即获取 FLUFFY</span><span class="ver" id="ver-badge2">APK</span>
+    </a>
+    <p class="hint">
+      <span data-i18n="cta-hint-1">Android 手机可直接安装 APK ·</span>
+      <a href="https://github.com/shizixian/FLUFFY/releases" target="_blank" rel="noopener" data-i18n="cta-hint-2">查看全部版本</a>
+    </p>
+  </div>
+</section>
+
+<!-- ═══ Footer ═══ -->
+<footer>
+  <p>FLUFFY · Made with <span class="heart">♡</span> · <a href="https://github.com/shizixian/FLUFFY" target="_blank" rel="noopener" data-i18n="footer-github">开源在 GitHub</a> · <a href="https://github.com/shizixian/FLUFFY/blob/main/PRIVACY.md" target="_blank" rel="noopener" data-i18n="footer-privacy">隐私说明</a></p>
+</footer>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ═══ i18n ═══ */
+  var I18N = {
+    zh: {
+      "nav-play": "玩法", "nav-features": "特性", "nav-shots": "截图", "nav-download": "下载",
+      "nav-github": "GitHub",
+      "hero-eyebrow": "可爱休闲 · 消消乐",
+      "hero-title-1": "点开、配对、", "hero-title-2": "清空烦恼",
+      "hero-sub": "一款为手机而生的可爱消除小游戏。点开未遮挡的牌，找出两张相同的，清空棋盘获胜 —— 简单、解压、一玩就停不下来。",
+      "hero-download": "免费下载 Android", "hero-github": "查看源码",
+      "badge-free": "免费 · 无广告", "badge-offline": "离线畅玩", "badge-lang": "中 / 繁 / EN",
+      "strip-lang": "简体 / 繁體 / English", "strip-stars": "三星评分系统",
+      "strip-solvable": "每局保证可解", "strip-free": "免费无广告",
+      "play-title": "三步上手", "play-sub": "规则简单到一看就会，玩起来却停不下来。",
+      "play-s1-t": "点开未遮挡的牌", "play-s1-p": "只有没被压住的牌才能点开，选牌前先观察整个棋盘。",
+      "play-s2-t": "找出两张相同", "play-s2-p": "选中两张相同的牌即可消除，配错也没关系，换一对再试。",
+      "play-s3-t": "清空棋盘获胜", "play-s3-p": "越快清空星级越高，重玩关卡刷新你的最佳纪录。",
+      "feat-title": "为什么你会爱上它", "feat-sub": "简单易上手，进阶有挑战 —— 完美的五分钟放松。",
+      "feat-1-t": "渐进式难度", "feat-1-p": "从简单开始逐步加码：更多牌、更深层叠、更巧妙的布局，但永远不会不公平。",
+      "feat-2-t": "三星评价系统", "feat-2-p": "每对牌 3.5 秒内消除拿满三星，重玩关卡挑战自己的最佳时间。",
+      "feat-3-t": "三种语言", "feat-3-p": "简体中文、繁体中文、English，随时在设置里一键切换。",
+      "feat-4-t": "每局保证可解", "feat-4-p": "棋盘由逆向成对生成，保证一定有解 —— 没有死局，只有纯粹的快乐。",
+      "feat-5-t": "限时关卡", "feat-5-p": "和时间赛跑拿时间奖励，消除越快分数越高。",
+      "feat-6-t": "离线畅玩", "feat-6-p": "无需网络。地铁上、飞机上，想玩就玩。",
+      "shots-title": "看看它有多可爱", "shots-sub": "温暖、精致、软萌 —— 为手机竖屏而生。",
+      "shots-1-cap": "主菜单", "shots-1-sub": "选头像、看星级、开始消除",
+      "shots-2-cap": "游戏画面", "shots-2-sub": "彩色层叠棋盘 + 计时 + 星级",
+      "cta-title": "准备好开玩了吗？", "cta-sub": "下载 FLUFFY，开始消除吧。免费、无广告、只有好心情。",
+      "cta-btn": "立即获取 FLUFFY",
+      "cta-hint-1": "Android 手机可直接安装 APK ·", "cta-hint-2": "查看全部版本",
+      "footer-github": "开源在 GitHub", "footer-privacy": "隐私说明"
+    },
+    en: {
+      "nav-play": "How to Play", "nav-features": "Features", "nav-shots": "Screenshots", "nav-download": "Download",
+      "nav-github": "GitHub",
+      "hero-eyebrow": "Cute Casual Puzzle",
+      "hero-title-1": "Match, Clear,", "hero-title-2": "and Relax",
+      "hero-sub": "A cute tile-matching puzzle game for your phone. Tap free tiles, find matching pairs, clear the board — simple, satisfying, and endlessly replayable.",
+      "hero-download": "Download Free on Android", "hero-github": "View Source",
+      "badge-free": "Free · No Ads", "badge-offline": "Offline Play", "badge-lang": "ZH / EN",
+      "strip-lang": "3 Languages", "strip-stars": "Star Rating System",
+      "strip-solvable": "Always Solvable", "strip-free": "Free, No Ads",
+      "play-title": "Three Steps to Play", "play-sub": "Simple to learn, tricky to master — the perfect 5-minute break.",
+      "play-s1-t": "Tap Uncovered Tiles", "play-s1-p": "Only tiles that aren't blocked can be selected — scan the board before you choose.",
+      "play-s2-t": "Match Two of a Kind", "play-s2-p": "Pick two identical tiles to eliminate them. Wrong match? Just try another pair.",
+      "play-s3-t": "Clear the Board", "play-s3-p": "Faster clears earn more stars. Replay levels to beat your best time.",
+      "feat-title": "Why You'll Love It", "feat-sub": "Simple to learn, tricky to master — the perfect 5-minute break.",
+      "feat-1-t": "Progressive Difficulty", "feat-1-p": "Start easy, get challenged. More tiles, deeper stacks, smarter layouts as you level up — but never unfair.",
+      "feat-2-t": "Star Rating System", "feat-2-p": "Clear each level fast to earn up to 3 stars. Replay to beat your best time and max out your score.",
+      "feat-3-t": "3 Languages", "feat-3-p": "Simplified Chinese, Traditional Chinese, English — switch anytime from the settings menu.",
+      "feat-4-t": "Solvable Layouts", "feat-4-p": "Every board is generated with a guaranteed solution. No dead ends, no frustration — just pure matching fun.",
+      "feat-5-t": "Timed Levels", "feat-5-p": "Race the clock and earn time bonuses. The faster you match, the higher your score.",
+      "feat-6-t": "Offline Play", "feat-6-p": "No internet needed. Play on the subway, on a plane, or wherever you want a quick mental break.",
+      "shots-title": "See It in Action", "shots-sub": "Warm, polished, and adorable — made for your phone.",
+      "shots-1-cap": "Main Menu", "shots-1-sub": "Pick an avatar, check your stars, start matching",
+      "shots-2-cap": "Gameplay", "shots-2-sub": "Colorful stacked board + timer + stars",
+      "cta-title": "Ready to Match?", "cta-sub": "Download FLUFFY and start clearing tiles. Free, no ads, just good vibes.",
+      "cta-btn": "Get FLUFFY Now",
+      "cta-hint-1": "Install the APK directly on Android ·", "cta-hint-2": "All releases",
+      "footer-github": "Open source on GitHub", "footer-privacy": "Privacy"
+    }
+  };
+
+  var lang = "zh";
+  try { lang = localStorage.getItem("fluffy-lang") || "zh"; } catch (e) {}
+  if (lang !== "zh" && lang !== "en") lang = "zh";
+
+  function applyLang(l) {
+    document.documentElement.lang = l === "zh" ? "zh-CN" : "en";
+    var dict = I18N[l];
+    document.querySelectorAll("[data-i18n]").forEach(function (el) {
+      var key = el.getAttribute("data-i18n");
+      if (dict[key] !== undefined) el.textContent = dict[key];
+    });
+    var btn = document.getElementById("lang-btn");
+    btn.textContent = l === "zh" ? "EN" : "中";
+    btn.title = l === "zh" ? "Switch to English" : "切换到中文";
+    try { localStorage.setItem("fluffy-lang", l); } catch (e) {}
+  }
+
+  document.getElementById("lang-btn").addEventListener("click", function () {
+    lang = lang === "zh" ? "en" : "zh";
+    applyLang(lang);
+  });
+  applyLang(lang);
+
+  /* ═══ 最新版本号 (GitHub API, 失败静默降级) ═══ */
+  fetch("https://api.github.com/repos/shizixian/FLUFFY/releases/latest")
+    .then(function (r) { return r.ok ? r.json() : Promise.reject(); })
+    .then(function (d) {
+      if (d && d.tag_name) {
+        var label = d.tag_name.replace(/^v/, "v");
+        ["ver-badge", "ver-badge2"].forEach(function (id) {
+          document.getElementById(id).textContent = label;
+        });
+      }
+    })
+    .catch(function () {});
+
+  /* ═══ 滚动显现 ═══ */
+  if ("IntersectionObserver" in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (en.isIntersecting) { en.target.classList.add("in"); io.unobserve(en.target); }
+      });
+    }, { threshold: 0.12 });
+    document.querySelectorAll(".reveal").forEach(function (el) { io.observe(el); });
+  } else {
+    document.querySelectorAll(".reveal").forEach(function (el) { el.classList.add("in"); });
+  }
+})();
+</script>
+</body>
+</html>
