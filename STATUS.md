@@ -64,7 +64,6 @@ scenes/main.tscn       主场景（Board / UI / 菜单挂载点）
 tests/run_tests.gd     headless 回归测试（143 项）
 assets/icons/          6 个牌面图标（jpg，白底）
 assets/bgm.ogg         背景音乐
-addons/admob/          第三方广告插件，当前代码中无任何引用（可删）
 index.html             官网落地页
 docs/                  Play Console 草稿等归档文档
 ```
@@ -88,6 +87,7 @@ godot --headless --path . --script res://tests/run_tests.gd
 - 通关面板、暂停面板、设置面板都是硬编码 720×1280 坐标，横屏或平板上会错位（未处理）。
 - 牌面图标是白底 jpg，靠圆角卡底遮住边缘；换成透明 PNG 会更干净。
 - `project.godot` 里 `config/version` 已改为 0.4.0，但发布 APK 仍需手动导出（`export_presets.cfg` 未入库）。
-- APK 体积约 171 MB，建议只导出 arm64 + 关闭调试符号后再压缩。
+- APK 已改为**仅 arm64**、不含 gradle 模板，v0.4.0 体积 28 MB（旧版 171 MB）。`export_presets.cfg` 含签名信息，仍在 .gitignore 里。
 - 每日挑战目前只有「最佳分 / 连击天数」，没有排行榜或分享图。
+- 官网（Cloudflare Pages）是手动部署的，push 到 main 不会自动发布；仓库里只保留页面源码。
 - 撤销栈不设上限，理论上可一路退回开局。

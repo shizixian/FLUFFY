@@ -26,7 +26,7 @@ A cute casual tile-matching puzzle game built with Godot 4.6.
 
 ## Download
 
-- [Download APK](https://github.com/shizixian/FLUFFY/releases/latest) — install directly on Android
+- [Download APK](https://github.com/shizixian/FLUFFY/releases/latest) — 28 MB, arm64 only, signed with the release key
 
 ## Screenshots
 
