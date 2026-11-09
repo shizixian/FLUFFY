@@ -15,8 +15,8 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 [application]
 
 config/name="FLUFFY羊羊乐"
-config/description="FLUFFY羊羊乐 - 经典羊羊乐消除小游戏 - 简单休闲配对消除"
-config/version="0.2.0"
+config/description="FLUFFY羊羊乐 - 经典羊羊乐消除小游戏 - 道具 / 连击 / 每日挑战"
+config/version="0.4.0"
 run/main_scene="res://scenes/main.tscn"
 config/features=PackedStringArray("4.6", "Forward Plus")
 config/icon="res://assets/game_icon.jpg"

@@ -32,12 +32,23 @@ const COLOR_BTN_BLUE      = Color(0.498, 0.620, 0.820)        # settings
 const COLOR_BTN_ORANGE    = Color(1.000, 0.722, 0.400)        # shuffle
 const COLOR_BTN_ROSE      = Color(0.780, 0.502, 0.400)        # restart
 const COLOR_BTN_NEUTRAL   = Color(0.651, 0.549, 0.451)        # pause / close
+const COLOR_BTN_PURPLE    = Color(0.627, 0.514, 0.784)        # daily challenge
 # --- Sizing ---
 const RADIUS_LARGE  = 24
 const RADIUS_MEDIUM = 18
 const RADIUS_PILL   = 28
 const SHADOW_SIZE   = 6
 const SHADOW_OFFSET = 3
+
+# ====================== v0.4 GAMEPLAY TUNING ======================
+const VERSION := "0.4.0"
+const COMBO_WINDOW := 3.0        # seconds between two clears to keep the combo alive
+const COMBO_MAX_STEPS := 4       # +50% score per combo step, capped
+const SLOT_COUNT := 3            # holding slots for the "move out" prop
+const HINT_CHARGES := 3
+const UNDO_CHARGES := 3
+const MOVEOUT_CHARGES := 3
+const DAILY_CARDS := 32
 
 # ====================== LOCALIZATION ======================
 const LOCALE = {
@@ -48,7 +59,7 @@ const LOCALE = {
 		"game_subtitle": "可爱配对消除 · 休闲小游戏",
 		"btn_start": "开始游戏", "btn_continue": "继续游戏",
 		"btn_settings": "设置", "btn_quit": "退出游戏",
-		"btn_about": "关于 · v0.3.4", "btn_close": "关闭",
+		"btn_about": "关于", "btn_close": "关闭",
 		"btn_shuffle": "洗牌", "btn_restart": "重来",
 		"btn_pause": "⏸ 暂停", "btn_next": "下一关",
 		"btn_resume": "继续游戏", "btn_exit_main": "退出至主页",
@@ -62,6 +73,29 @@ const LOCALE = {
 		"msg_shuffled": "已洗牌",
 		"msg_shuffled_solvable": "已洗牌（可解重排）",
 		"msg_shuffled_auto": "已洗牌（系统已自动重排直到有解）",
+		# --- v0.4: props / combo / daily ---
+		"btn_daily": "每日挑战",
+		"btn_hint": "提示",
+		"btn_undo": "撤销",
+		"btn_moveout": "移出",
+		"msg_hint_none": "暂时没有可消的对子，试试洗牌",
+		"msg_hint_used": "已高亮一对，快消掉它！",
+		"msg_undo_empty": "没有可撤销的操作",
+		"msg_undo_done": "已撤销一步",
+		"msg_charges_empty": "该道具次数已用完",
+		"msg_pick_tile": "先点选一张牌",
+		"msg_slot_empty": "先选一张牌，再点【移出】",
+		"msg_slot_match": "槽位消除！",
+		"msg_daily_locked": "今天的挑战已完成，明天再来",
+		"combo_text": "连击 ×%d",
+		"daily_title": "每日挑战",
+		"daily_sub": "每天一副固定牌面 · 全服同款",
+		"daily_done": "今日挑战完成！",
+		"daily_best": "今日最佳：%d",
+		"daily_streak": "🔥 连续 %d 天",
+		"lbl_streak": "🔥 %d",
+		"win_combo_best": "最高连击：×%d",
+		"win_daily_best": "今日最佳成绩：%d",
 		"win_title": "🌟 通关！",
 		"win_level_done": "第 %d 关完成",
 		"win_time": "用时: %s",
@@ -92,7 +126,7 @@ const LOCALE = {
 		"game_subtitle": "可愛配對消除 · 休閒小遊戲",
 		"btn_start": "開始遊戲", "btn_continue": "繼續遊戲",
 		"btn_settings": "設定", "btn_quit": "退出遊戲",
-		"btn_about": "關於 · v0.3.4", "btn_close": "關閉",
+		"btn_about": "關於", "btn_close": "關閉",
 		"btn_shuffle": "洗牌", "btn_restart": "重來",
 		"btn_pause": "⏸ 暫停", "btn_next": "下一關",
 		"btn_resume": "繼續遊戲", "btn_exit_main": "退出至主頁",
@@ -106,6 +140,29 @@ const LOCALE = {
 		"msg_shuffled": "已洗牌",
 		"msg_shuffled_solvable": "已洗牌（可解重排）",
 		"msg_shuffled_auto": "已洗牌（系統已自動重排直到有解）",
+		# --- v0.4: props / combo / daily ---
+		"btn_daily": "每日挑戰",
+		"btn_hint": "提示",
+		"btn_undo": "撤銷",
+		"btn_moveout": "移出",
+		"msg_hint_none": "暫時沒有可消的對子，試試洗牌",
+		"msg_hint_used": "已高亮一對，快消掉它！",
+		"msg_undo_empty": "沒有可撤銷的操作",
+		"msg_undo_done": "已撤銷一步",
+		"msg_charges_empty": "該道具次數已用完",
+		"msg_pick_tile": "先點選一張牌",
+		"msg_slot_empty": "先選一張牌，再點【移出】",
+		"msg_slot_match": "槽位消除！",
+		"msg_daily_locked": "今天的挑戰已完成，明天再來",
+		"combo_text": "連擊 ×%d",
+		"daily_title": "每日挑戰",
+		"daily_sub": "每天一副固定牌面 · 全服同款",
+		"daily_done": "今日挑戰完成！",
+		"daily_best": "今日最佳：%d",
+		"daily_streak": "🔥 連續 %d 天",
+		"lbl_streak": "🔥 %d",
+		"win_combo_best": "最高連擊：×%d",
+		"win_daily_best": "今日最佳成績：%d",
 		"win_title": "🌟 通關！",
 		"win_level_done": "第 %d 關完成",
 		"win_time": "用時: %s",
@@ -136,7 +193,7 @@ const LOCALE = {
 		"game_subtitle": "Cute Matching Puzzle · Casual Game",
 		"btn_start": "Start", "btn_continue": "Continue",
 		"btn_settings": "Settings", "btn_quit": "Quit",
-		"btn_about": "About · v0.3.4", "btn_close": "Close",
+		"btn_about": "About", "btn_close": "Close",
 		"btn_shuffle": "Shuffle", "btn_restart": "Restart",
 		"btn_pause": "⏸ Pause", "btn_next": "Next",
 		"btn_resume": "Continue", "btn_exit_main": "Exit to Menu",
@@ -150,6 +207,29 @@ const LOCALE = {
 		"msg_shuffled": "Shuffled!",
 		"msg_shuffled_solvable": "Shuffled (solvable)",
 		"msg_shuffled_auto": "Shuffled (auto-solved)",
+		# --- v0.4: props / combo / daily ---
+		"btn_daily": "Daily",
+		"btn_hint": "Hint",
+		"btn_undo": "Undo",
+		"btn_moveout": "Move",
+		"msg_hint_none": "No matching pair right now — try Shuffle",
+		"msg_hint_used": "A pair is highlighted!",
+		"msg_undo_empty": "Nothing to undo",
+		"msg_undo_done": "Undone",
+		"msg_charges_empty": "No charges left",
+		"msg_pick_tile": "Pick a tile first",
+		"msg_slot_empty": "Select a tile, then tap Move",
+		"msg_slot_match": "Slot cleared!",
+		"msg_daily_locked": "Today's challenge is done — come back tomorrow",
+		"combo_text": "Combo ×%d",
+		"daily_title": "Daily Challenge",
+		"daily_sub": "One fixed board a day · Same for everyone",
+		"daily_done": "Daily Challenge Cleared!",
+		"daily_best": "Today's best: %d",
+		"daily_streak": "🔥 %d-day streak",
+		"lbl_streak": "🔥 %d",
+		"win_combo_best": "Best combo: ×%d",
+		"win_daily_best": "Today's best score: %d",
 		"win_title": "🌟 Cleared!",
 		"win_level_done": "Level %d Complete",
 		"win_time": "Time: %s",
@@ -260,24 +340,40 @@ var elapsed_time: float = 0.0
 var timer_running: bool = false
 var timer_label: Label
 
-# Fixed layout for FLUFFY羊羊乐 style - 2D positions with layers. This keeps the "board size" (行数/布局) constant.
-# Deeper stacks added for increased difficulty (more tiles buried, fewer exposed at once).
-var layout = [
-  # top rows
-  {"gx":2, "gy":0, "layer":0}, {"gx":3, "gy":0, "layer":0},
-  # next
-  {"gx":1, "gy":1, "layer":0}, {"gx":2, "gy":1, "layer":0}, {"gx":3, "gy":1, "layer":0}, {"gx":4, "gy":1, "layer":0},
-  # main with layers (deeper stacks for higher difficulty)
-  {"gx":0, "gy":2, "layer":0}, {"gx":1, "gy":2, "layer":0}, {"gx":1, "gy":2, "layer":1},
-  {"gx":2, "gy":2, "layer":0}, {"gx":2, "gy":2, "layer":1}, {"gx":2, "gy":2, "layer":2}, {"gx":2, "gy":2, "layer":3},
-  {"gx":3, "gy":2, "layer":0}, {"gx":3, "gy":2, "layer":1}, {"gx":3, "gy":2, "layer":2}, {"gx":3, "gy":2, "layer":3},
-  {"gx":4, "gy":2, "layer":0}, {"gx":4, "gy":2, "layer":1}, {"gx":4, "gy":2, "layer":2},
-  {"gx":5, "gy":2, "layer":0}, {"gx":5, "gy":2, "layer":1},
-  # bottom
-  {"gx":0, "gy":3, "layer":0}, {"gx":1, "gy":3, "layer":0}, {"gx":2, "gy":3, "layer":0}, {"gx":3, "gy":3, "layer":0}, {"gx":4, "gy":3, "layer":0}, {"gx":5, "gy":3, "layer":0},
-  # extra for more
-  {"gx":1, "gy":4, "layer":0}, {"gx":2, "gy":4, "layer":0}, {"gx":3, "gy":4, "layer":0}, {"gx":4, "gy":4, "layer":0},
+# ====================== BOARD LAYOUTS (v0.4) ======================
+# Several board shapes, rotated by level so the campaign stops looking identical.
+# rows:   rows[gy] = [gx_start, gx_end]  (a contiguous run of tiles, layer 0)
+# stacks: [gx, gy, max_layer]            (layers 1..max_layer stacked on that cell)
+const LAYOUT_DEFS = [
+	{
+		"name": "diamond",
+		"rows": [[2, 3], [1, 4], [0, 5], [1, 4], [2, 3]],
+		"stacks": [[2, 2, 2], [3, 2, 2], [2, 3, 1], [3, 3, 1]],
+	},
+	{
+		"name": "pyramid",
+		"rows": [[2, 3], [1, 4], [0, 5], [0, 5], [1, 4]],
+		"stacks": [[2, 3, 2], [3, 3, 2], [2, 2, 1], [3, 2, 1]],
+	},
+	{
+		"name": "wide",
+		"rows": [[0, 5], [0, 5], [0, 5], [1, 4]],
+		"stacks": [[1, 1, 2], [2, 1, 2], [3, 1, 2], [4, 1, 2]],
+	},
+	{
+		"name": "classic",
+		"rows": [[2, 3], [1, 4], [0, 5], [0, 5], [1, 4]],
+		"stacks": [[2, 2, 3], [3, 2, 3], [4, 2, 2], [1, 2, 1], [5, 2, 1]],
+	},
+	{
+		"name": "towers",
+		"rows": [[0, 5], [0, 5], [0, 5], [0, 5]],
+		"stacks": [[0, 2, 2], [1, 2, 2], [2, 2, 2], [3, 2, 2], [4, 2, 2], [5, 2, 2]],
+	},
 ]
+
+var layout: Array = []
+var layout_index := 0
 
 var cards = []  # each {gx, gy, layer, type, node}
 
@@ -291,8 +387,6 @@ var selected_node = null  # the node for highlight, for convenience
 @onready var message_label: Label = $UI/MessageLabel
 @onready var shuffle_button: Button = $UI/ShuffleButton
 @onready var restart_button: Button = $UI/RestartButton
-@onready var selected1_label: Label = $UI/Selected1
-@onready var selected2_label: Label = $UI/Selected2
 @onready var win_panel: Panel = $UI/WinPanel
 @onready var next_button: Button = $UI/WinPanel/NextButton
 
@@ -345,6 +439,42 @@ var selected_avatar_for_profile := 0
 var safe_left_margin := 50  # adjusted for camera cutouts on mobile
 var _safe_area_detected := false
 
+# ====================== v0.4 RUNTIME STATE ======================
+var _rng := RandomNumberGenerator.new()
+var _last_generation_order: Array = []   # placement order of the solvable generator (for tests)
+var run_label := ""                      # "Level 3" / "Daily Challenge"
+var level_total_cards := 0               # tiles dealt this run (drives star rating)
+
+var hints_left := 0
+var undos_left := 0
+var moveouts_left := 0
+
+var history: Array = []                  # undo stack: match / slot_move / slot_pair
+var slot_tiles: Array = []               # SLOT_COUNT entries: {type, node} or null
+var selected_slot := -1
+
+var combo_count := 0
+var best_combo := 0
+var last_match_msec := -1000000
+
+var is_daily := false
+var daily_date := ""
+var daily_seed := 0
+var daily_best := 0
+var daily_streak := 0
+var daily_last_played := ""
+
+# v0.4 UI nodes
+var hint_btn: Button
+var undo_btn: Button
+var moveout_btn: Button
+var combo_label: Label
+var slot_panels: Array = []
+var slot_buttons: Array = []
+var daily_btn: Button
+var daily_badge: Label
+var _msg_seq := 0
+
 func _ready() -> void:
 	shuffle_button.pressed.connect(_on_shuffle_pressed)
 	restart_button.pressed.connect(_on_restart_pressed)
@@ -366,8 +496,10 @@ func _ready() -> void:
 	_add_pill_behind(level_label)
 	_add_pill_behind(score_label)
 	_add_pill_behind(remaining_label)
-	_add_pill_behind(selected1_label)
-	_add_pill_behind(selected2_label)
+
+	# HUD pills are dark, so the scene's dark text needs to be light
+	for lbl in [level_label, score_label, remaining_label]:
+		lbl.add_theme_color_override("font_color", COLOR_TEXT_LIGHT)
 
 	# Message label styling
 	message_label.add_theme_color_override("font_color", COLOR_TEXT_GOLD)
@@ -403,6 +535,9 @@ func _ready() -> void:
 	_setup_bgm()
 	_setup_settings_menu()
 	_setup_timer_label()
+	_setup_slot_ui()
+	_setup_props_ui()
+	_setup_combo_label()
 
 	# Load player data before building level select (needs max_level/level_stars)
 	load_player_data()
@@ -447,8 +582,34 @@ func _update_timer_display():
 		timer_label.text = _t("timer_format", [mins, secs])
 
 func start_level(new_level: int) -> void:
+	is_daily = false
 	level = new_level
 	score = 0 if level == 1 else score
+	run_label = _t("lbl_level", [level])
+	var def := _layout_def_for_level(level)
+	_begin_run(def, 16 + (level - 1) * 5)
+
+
+func start_daily() -> void:
+	is_daily = true
+	daily_date = Time.get_date_string_from_system()
+	daily_seed = int(daily_date.hash())
+	level = 1
+	score = 0
+	run_label = _t("daily_title")
+	# Fixed layout every player sees on the same day, driven by the date seed.
+	_begin_run(LAYOUT_DEFS[3], DAILY_CARDS, daily_seed)
+
+
+func _begin_run(def: Dictionary, target_wanted: int, seed_value: int = -1) -> void:
+	if seed_value >= 0:
+		_rng.seed = seed_value
+	else:
+		_rng.randomize()
+
+	layout_index = max(LAYOUT_DEFS.find(def), 0)
+	layout = _build_layout(def)
+
 	remaining_tiles = 0
 	elapsed_time = 0.0
 	timer_running = true
@@ -456,65 +617,78 @@ func start_level(new_level: int) -> void:
 	message_label.text = ""
 	message_label.visible = false
 	win_panel.visible = false
-	selected1_label.visible = false
-	selected2_label.visible = false
-	selected_idx = -1
-	selected_node = null
+	_clear_selection()
+	_clear_slots()
+	if combo_label and is_instance_valid(combo_label):
+		combo_label.visible = false
 	update_ui()
 
-	# Clear previous
+	# Clear previous board
 	for child in board_node.get_children():
 		child.queue_free()
 
 	cards.clear()
-
-	# Create fixed slots from layout
 	for pos in layout:
-		cards.append( {"gx": pos.gx, "gy": pos.gy, "layer": pos.layer, "type": -1, "node": null } )
+		cards.append({"gx": pos.gx, "gy": pos.gy, "layer": pos.layer, "type": -1, "node": null})
 
-	# Number of cards for this level (even).
-	# We now place *exactly the right quantity* of tiles so that a full solution exists.
-	# Faster growth + more types early + deeper stacks = higher difficulty (reaches cap faster, more variety on surface).
-	var target_cards = clamp(16 + (level - 1) * 5, 8, cards.size())
+	hints_left = HINT_CHARGES
+	undos_left = UNDO_CHARGES
+	moveouts_left = MOVEOUT_CHARGES
+	history.clear()
+	combo_count = 0
+	best_combo = 0
+	last_match_msec = -1000000
+
+	# Number of tiles for this run (always even).
+	var target_cards := int(clamp(target_wanted, 8, cards.size()))
 	if target_cards % 2 == 1:
 		target_cards += 1
+	level_total_cards = target_cards
 
-	# Build types with *even count per type* (critical: every tile must have a same-type partner).
-	# No loners that can never be matched.
-	# More types earlier for higher difficulty (harder to find matches on surface).
+	# More tile types on later levels / daily = harder to find a pair on the surface.
+	var num_types := int(min(4 + max(level, 1), TILE_TYPES.size()))
+	if is_daily:
+		num_types = TILE_TYPES.size()
+	var pairs_total := int(target_cards / 2)
+	var pairs_per := int(pairs_total / num_types)
+	var extra_pairs := int(pairs_total % num_types)
 	var types_pool: Array = []
-	var num_types = min(4 + level, TILE_TYPES.size())
-	var pairs_total = target_cards / 2
-	var pairs_per = pairs_total / num_types
-	var extra_pairs = pairs_total % num_types
 	for i in range(num_types):
-		var this_pairs = pairs_per + (1 if i < extra_pairs else 0)
+		var this_pairs := pairs_per + (1 if i < extra_pairs else 0)
 		for k in range(this_pairs * 2):
 			types_pool.append(i)
-	# types_pool.size() == target_cards and every used type has even count.
 
-	# Build count map for the generator
 	var needed: Dictionary = {}
 	for t in types_pool:
 		needed[t] = needed.get(t, 0) + 1
 
-	# Generate a *guaranteed solvable* layout using reverse pair placement.
-	# This fulfills the request: the initial deal uses the exact right number of blocks
-	# arranged so you can clear everything without being forced into "no moves but tiles left".
-	# (Suboptimal play can still create temporary blocks — that's when the retained shuffle helps.)
 	var generated := generate_solvable_layout(needed)
 	if not generated:
-		# Rare fallback: spread randomly (old behavior)
-		var slot_indices = range(cards.size())
-		slot_indices.shuffle()
+		# Defensive fallback only — the new generator should always succeed.
+		var slot_indices: Array = range(cards.size())
+		_shuffle(slot_indices)
 		for i in range(target_cards):
-			cards[ slot_indices[i] ].type = types_pool[i]
+			cards[slot_indices[i]].type = types_pool[i]
+
+	for p in slot_panels:
+		p.visible = true
+	for b in [hint_btn, undo_btn, moveout_btn]:
+		if b and is_instance_valid(b):
+			b.visible = true
+	pause_button.visible = true
+	shuffle_button.visible = true
+	restart_button.visible = true
 
 	render_cards()
-
 	remaining_tiles = target_cards
+	refresh_props_ui()
 	update_ui()
 	check_for_moves()
+
+
+func _card_position(c) -> Vector2:
+	return Vector2(25 + c.gx * 104 + (c.gy % 2) * 24, 110 + c.gy * 82 - c.layer * 22)
+
 
 func render_cards() -> void:
 	for i in range(cards.size()):
@@ -522,10 +696,7 @@ func render_cards() -> void:
 		if c.type == -1:
 			continue
 		var node = create_tile_node(c.type, i)
-		# Position based on fixed gx gy layer
-		var pos_x = 25 + c.gx * 104 + (c.gy % 2) * 24
-		var pos_y = 110 + c.gy * 82 - c.layer * 22
-		node.position = Vector2(pos_x, pos_y)
+		node.position = _card_position(c)
 		board_node.add_child(node)
 		c.node = node
 
@@ -535,12 +706,33 @@ func create_tile_node(type_idx: int, card_idx: int) -> Node2D:
 	var icon_size := 72
 	var half := icon_size / 2.0
 
-	# Selection border (behind the button)
+	# Rounded card behind the artwork — makes stacked tiles read as cards instead of
+	# square crops, and frames the (white-background) icon images.
+	var card := Panel.new()
+	card.name = "Card"
+	card.size = Vector2(icon_size + 10, icon_size + 10)
+	card.position = -card.size / 2.0
+	card.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var card_style := StyleBoxFlat.new()
+	card_style.bg_color = Color(1.0, 0.99, 0.955)
+	card_style.set_corner_radius_all(14)
+	card_style.border_width_left = 1
+	card_style.border_width_right = 1
+	card_style.border_width_top = 1
+	card_style.border_width_bottom = 1
+	card_style.border_color = Color(0.35, 0.26, 0.20, 0.20)
+	card_style.shadow_size = 3
+	card_style.shadow_offset = Vector2(0, 2)
+	card_style.shadow_color = Color(0, 0, 0, 0.16)
+	card.add_theme_stylebox_override("panel", card_style)
+	node.add_child(card)
+
+	# Selection border (behind the icon, one step bigger so it stays visible)
 	var sel_border = ColorRect.new()
 	sel_border.name = "SelBorder"
-	sel_border.size = Vector2(icon_size, icon_size)
+	sel_border.size = Vector2(icon_size + 12, icon_size + 12)
 	sel_border.color = Color(1, 0.85, 0, 0)
-	sel_border.position = Vector2(-half, -half)
+	sel_border.position = -sel_border.size / 2.0
 	sel_border.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	node.add_child(sel_border)
 
@@ -569,11 +761,19 @@ func create_tile_node(type_idx: int, card_idx: int) -> Node2D:
 	icon.position = Vector2(-half, -half)
 	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	# Lower layers sit slightly in shadow so the pile reads as depth.
+	var depth := 0
+	if card_idx >= 0 and card_idx < cards.size():
+		depth = int(cards[card_idx].layer)
+	var tint := clampf(1.0 - depth * 0.06, 0.78, 1.0)
+	icon.modulate = Color(tint, tint, tint)
 	node.add_child(icon)
 
 	return node
 
 func _on_card_button_pressed(card_idx: int) -> void:
+	if paused or win_panel.visible:
+		return
 	if not is_card_free(card_idx):
 		return
 	# Brief visual feedback — flash the button
@@ -589,74 +789,415 @@ func _on_card_button_pressed(card_idx: int) -> void:
 
 
 func handle_tile_click(card_idx: int) -> void:
-	# Free check is already done in _input before calling us
+	if paused or win_panel.visible:
+		return
 	var c = cards[card_idx]
+	if c.type == -1:
+		return
+
+	# A slot tile is already selected → this tap is the second pick.
+	if selected_slot >= 0:
+		var held = slot_tiles[selected_slot]
+		if held != null and held.type == c.type:
+			var slot_i = selected_slot
+			_clear_selection()
+			_match_board_with_slot(card_idx, slot_i)
+		else:
+			_flash_message(_t("msg_no_match"))
+			_break_combo()
+			_clear_selection()
+			_select_card(card_idx)
+			update_ui()
+		return
 
 	if selected_idx == -1:
-		# First selection
-		selected_idx = card_idx
-		selected_node = c.node
-		highlight_tile(selected_node, true)
-		update_selected_ui()
+		_select_card(card_idx)
+		update_ui()
+		return
+
+	if selected_idx == card_idx:
+		_clear_selection()
+		update_ui()
+		return
+
+	if cards[selected_idx].type == c.type:
+		var idx1 = selected_idx
+		_clear_selection()
+		_do_match(idx1, card_idx)
 	else:
-		# Second selection
-		if selected_idx == card_idx:
-			# Same card, deselect
-			if selected_node and is_instance_valid(selected_node):
-				highlight_tile(selected_node, false)
-			selected_idx = -1
-			selected_node = null
-			update_selected_ui()
+		_flash_message(_t("msg_no_match"))
+		_break_combo()
+		_clear_selection()
+		_select_card(card_idx)
+		update_ui()
+		check_for_moves()
+
+
+# ====================== MATCHING / COMBO ======================
+
+func _do_match(idx1: int, idx2: int) -> void:
+	var t = cards[idx1].type
+	var gain = _register_match()
+	remove_card(idx1)
+	remove_card(idx2)
+	score += gain
+	history.append({"kind": "match", "a": idx1, "b": idx2, "type": t, "score": gain})
+	_flash_message(_t("msg_match"))
+	_after_clear()
+
+
+func _match_board_with_slot(card_idx: int, slot_i: int) -> void:
+	var held = slot_tiles[slot_i]
+	if held == null:
+		return
+	var t = held.type
+	var gain = _register_match()
+	remove_card(card_idx)
+	_clear_slot(slot_i, true)
+	score += gain
+	history.append({"kind": "board_slot", "idx": card_idx, "slot": slot_i, "type": t, "score": gain})
+	_flash_message(_t("msg_match"))
+	_after_clear()
+
+
+func _register_match() -> int:
+	# Combo: chaining clears within COMBO_WINDOW seconds multiplies the score.
+	var now = Time.get_ticks_msec()
+	if now - last_match_msec <= int(COMBO_WINDOW * 1000):
+		combo_count += 1
+	else:
+		combo_count = 1
+	last_match_msec = now
+	best_combo = max(best_combo, combo_count)
+
+	var base = 10 + max(level, 1) * 2
+	var mult = 1.0 + 0.5 * min(combo_count - 1, COMBO_MAX_STEPS)
+	var gain = int(round(base * mult))
+	if combo_count >= 2:
+		_show_combo(combo_count)
+	return gain
+
+
+func _break_combo() -> void:
+	combo_count = 0
+	last_match_msec = -1000000
+
+
+func _after_clear() -> void:
+	refresh_props_ui()
+	update_ui()
+	if remaining_tiles <= 0:
+		show_win()
+	else:
+		check_for_moves()
+
+
+# ====================== SELECTION HELPERS ======================
+
+func _select_card(idx: int) -> void:
+	selected_idx = idx
+	selected_node = cards[idx].node
+	highlight_tile(selected_node, true)
+
+
+func _select_slot(i: int) -> void:
+	selected_slot = i
+	_highlight_slot(i, true)
+
+
+func _clear_selection() -> void:
+	if selected_node and is_instance_valid(selected_node):
+		highlight_tile(selected_node, false)
+	selected_idx = -1
+	selected_node = null
+	if selected_slot >= 0:
+		_highlight_slot(selected_slot, false)
+	selected_slot = -1
+
+
+func _highlight_slot(i: int, on: bool) -> void:
+	if i < 0 or i >= slot_panels.size():
+		return
+	var panel = slot_panels[i]
+	if panel and is_instance_valid(panel):
+		var style = panel.get_theme_stylebox("panel")
+		if style is StyleBoxFlat:
+			style.border_color = COLOR_ACCENT_GOLD if on else Color(COLOR_SURFACE_DARK.r, COLOR_SURFACE_DARK.g, COLOR_SURFACE_DARK.b, 0.55)
+			style.border_width_left = 3 if on else 2
+			style.border_width_right = 3 if on else 2
+			style.border_width_top = 3 if on else 2
+			style.border_width_bottom = 3 if on else 2
+
+
+# ====================== SLOTS ("MOVE OUT") ======================
+
+func _has_empty_slot() -> bool:
+	for i in range(SLOT_COUNT):
+		if i >= slot_tiles.size() or slot_tiles[i] == null:
+			return true
+	return false
+
+
+func _first_empty_slot() -> int:
+	for i in range(SLOT_COUNT):
+		if i >= slot_tiles.size() or slot_tiles[i] == null:
+			return i
+	return -1
+
+
+func _has_free_card() -> bool:
+	for i in range(cards.size()):
+		if is_card_free(i):
+			return true
+	return false
+
+
+func _clear_slot(i: int, animate: bool) -> void:
+	if i < 0 or i >= slot_tiles.size():
+		return
+	var held = slot_tiles[i]
+	if held == null:
+		return
+	slot_tiles[i] = null
+	remaining_tiles -= 1
+	if held.node and is_instance_valid(held.node):
+		var node = held.node
+		if animate:
+			var tween = create_tween()
+			tween.tween_property(node, "scale", Vector2(1.25, 1.25), 0.08)
+			tween.tween_property(node, "scale", Vector2(0.05, 0.05), 0.15)
+			tween.tween_callback(node.queue_free)
+		else:
+			node.queue_free()
+	update_slot_ui()
+
+
+func _clear_slots() -> void:
+	for i in range(slot_tiles.size()):
+		var held = slot_tiles[i]
+		if held != null and held.node and is_instance_valid(held.node):
+			held.node.queue_free()
+	slot_tiles.clear()
+	for i in range(SLOT_COUNT):
+		slot_tiles.append(null)
+	selected_slot = -1
+	update_slot_ui()
+
+
+func _take_card_to_slot(idx: int, t: int) -> void:
+	var c = cards[idx]
+	# Leaves the board but is NOT counted as cleared — it still has to be matched.
+	if c.node and is_instance_valid(c.node):
+		c.node.queue_free()
+	c.node = null
+	c.type = -1
+	var slot_i = _first_empty_slot()
+	if slot_i < 0:
+		return
+	slot_tiles[slot_i] = {"type": t, "node": _create_slot_tile(t, slot_i)}
+	update_slot_ui()
+
+
+func _auto_match_slots() -> void:
+	for i in range(SLOT_COUNT):
+		for j in range(i + 1, SLOT_COUNT):
+			var a = slot_tiles[i]
+			var b = slot_tiles[j]
+			if a != null and b != null and a.type == b.type:
+				var t = a.type
+				var gain = _register_match()
+				_clear_slot(i, true)
+				_clear_slot(j, true)
+				score += gain
+				history.append({"kind": "slot_pair", "a": i, "b": j, "type": t, "score": gain})
+				_flash_message(_t("msg_slot_match"))
+				_after_clear()
+				return
+
+
+func _on_slot_pressed(i: int) -> void:
+	if paused or win_panel.visible:
+		return
+	var held = slot_tiles[i] if i < slot_tiles.size() else null
+	if held == null:
+		return
+
+	if selected_idx >= 0:
+		if cards[selected_idx].type == held.type:
+			var board_i = selected_idx
+			_clear_selection()
+			_match_board_with_slot(board_i, i)
+		else:
+			_flash_message(_t("msg_no_match"))
+			_break_combo()
+			_clear_selection()
+			_select_slot(i)
+			update_ui()
+		return
+
+	if selected_slot == i:
+		_clear_selection()
+		return
+
+	_clear_selection()
+	_select_slot(i)
+	update_ui()
+
+
+func _on_moveout_pressed() -> void:
+	if paused or win_panel.visible:
+		return
+	if moveouts_left <= 0:
+		_flash_message(_t("msg_charges_empty"))
+		return
+	if selected_idx < 0:
+		_flash_message(_t("msg_slot_empty"))
+		return
+	if not _has_empty_slot():
+		_flash_message(_t("msg_slot_full"))
+		return
+	var idx = selected_idx
+	var t = cards[idx].type
+	_clear_selection()
+	_take_card_to_slot(idx, t)
+	moveouts_left -= 1
+	history.append({"kind": "slot_move", "idx": idx, "type": t})
+	refresh_props_ui()
+	update_ui()
+	_auto_match_slots()
+
+
+# ====================== PROPS: HINT / UNDO ======================
+
+func _on_hint_pressed() -> void:
+	if paused or win_panel.visible:
+		return
+	if hints_left <= 0:
+		_flash_message(_t("msg_charges_empty"))
+		return
+	var pair = _find_hint_pair()
+	if pair.is_empty():
+		_flash_message(_t("msg_hint_none"))
+		return
+	hints_left -= 1
+	_flash_message(_t("msg_hint_used"))
+	_pulse_hint(pair)
+	refresh_props_ui()
+
+
+func _find_hint_pair() -> Array:
+	# Prefer a pair of free board tiles; fall back to a slot tile + free board tile.
+	var free_list: Array = []
+	for i in range(cards.size()):
+		if is_card_free(i):
+			free_list.append(i)
+
+	var by_type: Dictionary = {}
+	for i in free_list:
+		var t = cards[i].type
+		if not by_type.has(t):
+			by_type[t] = []
+		by_type[t].append(i)
+	for t in by_type.keys():
+		if by_type[t].size() >= 2:
+			return [{"slot": -1, "idx": by_type[t][0]}, {"slot": -1, "idx": by_type[t][1]}]
+
+	for i in range(SLOT_COUNT):
+		if i >= slot_tiles.size() or slot_tiles[i] == null:
+			continue
+		var st = slot_tiles[i]
+		if by_type.has(st.type):
+			return [{"slot": i, "idx": -1}, {"slot": -1, "idx": by_type[st.type][0]}]
+	return []
+
+
+func _pulse_hint(pair: Array) -> void:
+	for entry in pair:
+		var target = null
+		if entry["slot"] >= 0:
+			if entry["slot"] < slot_buttons.size():
+				target = slot_buttons[entry["slot"]]
+		elif entry["idx"] >= 0:
+			target = cards[entry["idx"]].node
+		if target == null or not is_instance_valid(target):
+			continue
+		var tw = create_tween()
+		tw.set_loops(3)
+		tw.tween_property(target, "modulate", Color(1.4, 1.3, 0.5), 0.22)
+		tw.tween_property(target, "modulate", Color(1, 1, 1), 0.22)
+
+
+func _on_undo_pressed() -> void:
+	if paused or win_panel.visible:
+		return
+	if undos_left <= 0:
+		_flash_message(_t("msg_charges_empty"))
+		return
+	if history.is_empty():
+		_flash_message(_t("msg_undo_empty"))
+		return
+
+	var action: Dictionary = history.pop_back()
+	match action["kind"]:
+		"match":
+			_restore_card(int(action["a"]), int(action["type"]), true)
+			_restore_card(int(action["b"]), int(action["type"]), true)
+			score = max(score - int(action["score"]), 0)
+		"board_slot":
+			_restore_card(int(action["idx"]), int(action["type"]), true)
+			_restore_slot(int(action["slot"]), int(action["type"]), true)
+			score = max(score - int(action["score"]), 0)
+		"slot_move":
+			_restore_card(int(action["idx"]), int(action["type"]), false)
+			_remove_slot_of_type(int(action["type"]))
+		"slot_pair":
+			_restore_slot(int(action["a"]), int(action["type"]), true)
+			_restore_slot(int(action["b"]), int(action["type"]), true)
+			score = max(score - int(action["score"]), 0)
+
+	undos_left -= 1
+	_break_combo()
+	_flash_message(_t("msg_undo_done"))
+	refresh_props_ui()
+	update_ui()
+	check_for_moves()
+
+
+func _restore_card(idx: int, t: int, count_it: bool) -> void:
+	var c = cards[idx]
+	if c.type != -1:
+		return
+	c.type = t
+	var node = create_tile_node(t, idx)
+	node.position = _card_position(c)
+	board_node.add_child(node)
+	c.node = node
+	if count_it:
+		remaining_tiles += 1
+
+
+func _restore_slot(i: int, t: int, count_it: bool) -> void:
+	if slot_tiles[i] != null:
+		var old = slot_tiles[i]
+		if old.node and is_instance_valid(old.node):
+			old.node.queue_free()
+		slot_tiles[i] = null
+	slot_tiles[i] = {"type": t, "node": _create_slot_tile(t, i)}
+	if count_it:
+		remaining_tiles += 1
+	update_slot_ui()
+
+
+func _remove_slot_of_type(t: int) -> void:
+	for i in range(slot_tiles.size()):
+		var held = slot_tiles[i]
+		if held != null and held.type == t:
+			if held.node and is_instance_valid(held.node):
+				held.node.queue_free()
+			slot_tiles[i] = null
+			update_slot_ui()
 			return
 
-		var first_type = cards[selected_idx].type
-		var second_type = c.type
-
-		if first_type == second_type:
-			# Match! Remove both
-			# Clear selection state FIRST
-			var idx1 = selected_idx
-			var node1 = selected_node
-			selected_idx = -1
-			selected_node = null
-			update_selected_ui()
-
-			remove_card(idx1)
-			remove_card(card_idx)
-
-			score += 10 + level * 2
-			# remaining already decreased in remove_card
-
-			message_label.text = _t("msg_match")
-			message_label.visible = true
-			await get_tree().create_timer(0.6).timeout
-			message_label.text = ""
-			message_label.visible = false
-
-			# Check win
-			if remaining_tiles <= 0:
-				show_win()
-			else:
-				check_for_moves()
-		else:
-			message_label.text = _t("msg_no_match")
-			message_label.visible = true
-			await get_tree().create_timer(0.8).timeout
-			message_label.text = ""
-			message_label.visible = false
-
-			# Deselect old
-			if selected_node and is_instance_valid(selected_node):
-				highlight_tile(selected_node, false)
-			selected_idx = card_idx
-			selected_node = c.node
-			highlight_tile(selected_node, true)
-			update_selected_ui()
-
-			# Re-check moves in case the board state changed the "stuck" status
-			check_for_moves()
-
-	update_ui()
 
 func highlight_tile(tile_node: Node, on: bool) -> void:
 	if not tile_node or not is_instance_valid(tile_node):
@@ -703,121 +1244,179 @@ func is_card_free(idx: int) -> bool:
 
 	return true
 
-func _is_slot_placeable(idx: int) -> bool:
-	var c = cards[idx]
-	if c.type != -1:
-		return false
+func _cell_key(gx: int, gy: int) -> String:
+	return "%d:%d" % [gx, gy]
 
-	# Covered by higher layer at same (gx,gy)?
-	for j in range(cards.size()):
-		var o = cards[j]
-		if o.type != -1 and o.gx == c.gx and o.gy == c.gy and o.layer > c.layer:
-			return false
 
-	# Has at least one clear side (left or right same layer/row has no tile)
-	# This mirrors the "free" rule used for selection.
-	var left_clear = true
-	var right_clear = true
-	for j in range(cards.size()):
-		var o = cards[j]
-		if o.type != -1 and o.layer == c.layer and o.gy == c.gy:
-			if o.gx == c.gx - 1:
-				left_clear = false
-			if o.gx == c.gx + 1:
-				right_clear = false
-	return left_clear or right_clear
+func _shuffle(arr: Array) -> void:
+	# Deterministic shuffle driven by _rng, so a daily challenge can be replayed exactly.
+	for i in range(arr.size() - 1, 0, -1):
+		var j := _rng.randi_range(0, i)
+		var tmp = arr[i]
+		arr[i] = arr[j]
+		arr[j] = tmp
+
+
+func _build_layout(def: Dictionary) -> Array:
+	var out: Array = []
+	var rows: Array = def["rows"]
+	for gy in range(rows.size()):
+		var span: Array = rows[gy]
+		for gx in range(int(span[0]), int(span[1]) + 1):
+			out.append({"gx": gx, "gy": gy, "layer": 0})
+	for s in def.get("stacks", []):
+		for l in range(1, int(s[2]) + 1):
+			out.append({"gx": int(s[0]), "gy": int(s[1]), "layer": l})
+	return out
+
+
+func _layout_def_for_level(lv: int) -> Dictionary:
+	# Pick the smallest board that fits this level's tile budget, so the campaign
+	# grows monotonically instead of shrinking every time the shape rotates.
+	var desired := 16 + (int(max(lv, 1)) - 1) * 4
+	var ranked: Array = []
+	for def in LAYOUT_DEFS:
+		ranked.append({"def": def, "size": _build_layout(def).size()})
+	ranked.sort_custom(func(a, b): return a["size"] < b["size"])
+	for entry in ranked:
+		if entry["size"] >= desired:
+			return entry["def"]
+	return ranked[ranked.size() - 1]["def"]
+
+
+func _next_free_layers(fill: Dictionary, cell_max: Dictionary) -> Array:
+	# One entry per cell: the next layer that must be filled to keep stacks bottom-up.
+	var out: Array = []
+	for key in fill.keys():
+		var l := int(fill[key])
+		if l <= int(cell_max[key]):
+			out.append(key)
+	return out
 
 
 func generate_solvable_layout(needed: Dictionary) -> bool:
-	# Reverse-build a guaranteed solvable board by placing pairs onto positions
-	# that are "placeable" (would be free/selectable in the reverse of elimination).
-	# This is the core of "放数量正好的方块": we only ever introduce matched pairs
-	# onto spots that respect the current free rules, so a complete clearing sequence
-	# is guaranteed to exist by construction.
-	# Every type count in 'needed' must be even.
-	var total_to_place: int = 0
-	for cnt in needed.values():
-		total_to_place += cnt
-	if total_to_place == 0 or total_to_place % 2 != 0:
+	# Reverse-pair placement, guaranteed solvable.
+	#
+	# The play rule is "a tile is free when nothing is stacked directly on top of it",
+	# so any legal clear order is top-down. We build the board the other way round:
+	# each stack is filled from its lowest layer upwards, two tiles (in two different
+	# cells) at a time. Reversing that placement order is then a legal full clear —
+	# when a pair comes up, every tile that could cover it has already been removed.
+	#
+	# Two details make it fail-proof:
+	#  * quota: how many tiles each cell gets is decided up front by water-filling, so
+	#    the work is always spread over many cells and never piles up on the last one;
+	#  * pairing always takes the two cells with the largest remaining quota, which
+	#    keeps that spread invariant while placing.
+	var total := 0
+	for v in needed.values():
+		total += int(v)
+	if total <= 0:
 		return false
 
-	var max_attempts := 120
-	for attempt in range(max_attempts):
-		# Start this attempt with a completely empty board (only layout slots exist)
-		for c in cards:
-			c.type = -1
+	for c in cards:
+		c.type = -1
 
-		var current_needed: Dictionary = needed.duplicate()
-		var placed := 0
-		var stuck := false
+	var cell_max: Dictionary = {}
+	var slot_of: Dictionary = {}
+	for i in range(cards.size()):
+		var c = cards[i]
+		var key := _cell_key(c.gx, c.gy)
+		cell_max[key] = max(int(cell_max.get(key, -1)), int(c.layer))
+		slot_of["%s:%d" % [key, int(c.layer)]] = i
 
-		while placed < total_to_place:
-			# Find currently placeable empty slots under the free rules
-			var placeables: Array = []
-			for i in range(cards.size()):
-				if _is_slot_placeable(i):
-					placeables.append(i)
-
-			if placeables.size() < 2:
-				stuck = true
+	# Quota per cell (how many tiles of its stack will be used), water-filled from the
+	# bottom so that no cell is ever the only one left with work to do.
+	var quota: Dictionary = {}
+	var fill: Dictionary = {}
+	for key in cell_max.keys():
+		quota[key] = 0
+		fill[key] = 0
+	var to_assign := total
+	var layer := 0
+	while to_assign > 0:
+		var progressed := false
+		for key in quota.keys():
+			if to_assign <= 0:
 				break
+			if int(quota[key]) <= layer and int(quota[key]) <= int(cell_max[key]):
+				quota[key] = int(quota[key]) + 1
+				to_assign -= 1
+				progressed = true
+		if not progressed:
+			return false
+		layer += 1
 
-			# Pick a type that still has at least a pair left to place
-			var avail_types: Array = []
-			for t in current_needed.keys():
-				if current_needed[t] >= 2:
-					avail_types.append(t)
+	# Type pool: one entry per pair. A "move out" can leave a single odd tile; it is
+	# placed last so it sits on top and can be paired with the tile held in a slot.
+	var pair_types: Array = []
+	var odd_type := -1
+	for t in needed.keys():
+		var cnt := int(needed[t])
+		if cnt % 2 == 1:
+			odd_type = int(t)
+			cnt -= 1
+		for k in range(cnt / 2):
+			pair_types.append(int(t))
+	_shuffle(pair_types)
 
-			if avail_types.size() == 0:
-				stuck = true
+	var order: Array = []
+	while pair_types.size() > 0:
+		# Two distinct cells with the most remaining quota — random among ties.
+		var keys: Array = []
+		for key in quota.keys():
+			if int(quota[key]) > 0:
+				keys.append(key)
+		if keys.size() < 2:
+			return false
+		keys.sort_custom(func(a, b): return int(quota[a]) > int(quota[b]))
+		var top: int = int(quota[keys[0]])
+		var tied: Array = keys.filter(func(k): return int(quota[k]) == top)
+		_shuffle(tied)
+		var key_a: String = tied[0]
+		var rest: Array = keys.filter(func(k): return k != key_a)
+		var key_b: String = rest[0]
+
+		var ia := int(slot_of["%s:%d" % [key_a, int(fill[key_a])]])
+		var ib := int(slot_of["%s:%d" % [key_b, int(fill[key_b])]])
+		fill[key_a] = int(fill[key_a]) + 1
+		fill[key_b] = int(fill[key_b]) + 1
+		quota[key_a] = int(quota[key_a]) - 1
+		quota[key_b] = int(quota[key_b]) - 1
+
+		var t: int = pair_types.pop_back()
+		cards[ia].type = t
+		cards[ib].type = t
+		order.append([ia, ib])
+
+	if odd_type >= 0:
+		var key := ""
+		for k in quota.keys():
+			if int(quota[k]) > 0:
+				key = k
 				break
+		if key == "":
+			return false
+		var ix := int(slot_of["%s:%d" % [key, int(fill[key])]])
+		cards[ix].type = odd_type
+		fill[key] = int(fill[key]) + 1
+		quota[key] = int(quota[key]) - 1
+		order.append([ix])
 
-			# Random choices give good variety while staying solvable
-			placeables.shuffle()
-			avail_types.shuffle()
-
-			var p1: int = placeables[0]
-			var p2: int = placeables[1]
-			var chosen: int = avail_types[0]
-
-			cards[p1].type = chosen
-			cards[p2].type = chosen
-			current_needed[chosen] -= 2
-			if current_needed[chosen] <= 0:
-				current_needed.erase(chosen)
-			placed += 2
-
-		if not stuck and placed == total_to_place:
-			return true
-
-	# Could not find a solvable arrangement in the attempts (very rare with current layout sizes).
-	return false
+	_last_generation_order = order
+	return true
 
 
 func update_ui() -> void:
-	level_label.text = _t("lbl_level", [level])
+	level_label.text = run_label if run_label != "" else _t("lbl_level", [level])
 	score_label.text = _t("lbl_score", [score])
 	remaining_label.text = _t("lbl_remaining", [remaining_tiles])
 
-func update_selected_ui() -> void:
-	if selected_idx == -1:
-		selected1_label.visible = false
-		selected2_label.visible = false
-		$UI/Selected1Pill.visible = false
-		$UI/Selected2Pill.visible = false
-	else:
-		var t = cards[selected_idx].type
-		selected1_label.text = _t("selected_one", [_tile_name(t)])
-		selected1_label.visible = true
-		selected2_label.text = _t("select_another")
-		selected2_label.visible = true
-		$UI/Selected1Pill.visible = true
-		$UI/Selected2Pill.visible = true
 
 func has_possible_move() -> bool:
-	# Returns true if there exists at least one pair of free cards with the same type.
-	# This is the proper "can I clear more?" check so the game doesn't get stuck unplayably.
-	var free_list = []
+	# "Can I still clear something?" — board pairs, slot pairs, or a slot tile that
+	# matches a free board tile.
+	var free_list: Array = []
 	for i in range(cards.size()):
 		if is_card_free(i):
 			free_list.append(i)
@@ -825,97 +1424,114 @@ func has_possible_move() -> bool:
 		for b in range(a + 1, free_list.size()):
 			if cards[free_list[a]].type == cards[free_list[b]].type:
 				return true
+	for i in range(SLOT_COUNT):
+		for j in range(i + 1, SLOT_COUNT):
+			var x = slot_tiles[i] if i < slot_tiles.size() else null
+			var y = slot_tiles[j] if j < slot_tiles.size() else null
+			if x != null and y != null and x.type == y.type:
+				return true
+	for i in range(SLOT_COUNT):
+		if i >= slot_tiles.size() or slot_tiles[i] == null:
+			continue
+		var st = slot_tiles[i]
+		for idx in free_list:
+			if cards[idx].type == st.type:
+				return true
 	return false
+
 
 func check_for_moves() -> void:
 	if remaining_tiles == 0:
 		return
+	shuffle_button.disabled = false
 	if has_possible_move():
 		message_label.text = ""
 		message_label.visible = false
-		shuffle_button.disabled = false
+	elif moveouts_left > 0 and _has_empty_slot() and _has_free_card():
+		# Not stuck yet — the player can still "move out" a tile into a slot.
+		message_label.text = ""
+		message_label.visible = false
 	else:
 		message_label.text = _t("msg_no_moves")
 		message_label.visible = true
-		shuffle_button.disabled = false
+
+
+func _flash_message(text: String, dur: float = 0.8) -> void:
+	_msg_seq += 1
+	var mine = _msg_seq
+	message_label.text = text
+	message_label.visible = true
+	await get_tree().create_timer(dur).timeout
+	if mine == _msg_seq:
+		message_label.text = ""
+		message_label.visible = false
+
+
+func _show_combo(n: int) -> void:
+	if combo_label == null or not is_instance_valid(combo_label):
+		return
+	combo_label.text = _t("combo_text", [n])
+	combo_label.visible = true
+	combo_label.modulate.a = 1.0
+	combo_label.pivot_offset = combo_label.size / 2
+	combo_label.scale = Vector2(0.6, 0.6)
+	var tw = create_tween()
+	tw.tween_property(combo_label, "scale", Vector2(1.15, 1.15), 0.18).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tw.tween_property(combo_label, "scale", Vector2(1.0, 1.0), 0.12)
+	tw.tween_property(combo_label, "modulate:a", 0.0, 0.5).set_delay(0.45)
+	tw.tween_callback(func(): combo_label.visible = false)
+
+
+func _slot_tile_count() -> int:
+	var n := 0
+	for st in slot_tiles:
+		if st != null:
+			n += 1
+	return n
+
 
 func _on_shuffle_pressed() -> void:
-	# Collect remaining types
+	# Re-deal only the tiles still on the board; tiles parked in slots stay there.
 	var remaining_types: Array = []
 	for c in cards:
 		if c.type != -1:
 			remaining_types.append(c.type)
-
-	if remaining_types.size() == 0:
+	if remaining_types.is_empty():
 		return
 
-	remaining_types.shuffle()
-
-	# Clear all current nodes and types
+	_clear_selection()
+	_break_combo()
 	for c in cards:
 		if c.node and is_instance_valid(c.node):
 			c.node.queue_free()
 		c.node = null
 		c.type = -1
 
-	# Try to re-deal the remaining tiles using the solvable generator first.
-	# This makes shuffle not only give you an immediate move, but a full solvable
-	# endgame layout for the remaining cards (aligns with the "exact right quantity" goal).
 	var remaining_needed: Dictionary = {}
 	for t in remaining_types:
 		remaining_needed[t] = remaining_needed.get(t, 0) + 1
 
-	var used_solvable_shuffle := false
-	if generate_solvable_layout(remaining_needed):
-		used_solvable_shuffle = true
-	else:
-		# Fallback to classic random spread across full layout
-		var slot_indices = range(cards.size())
-		slot_indices.shuffle()
+	var used_solvable := generate_solvable_layout(remaining_needed)
+	if not used_solvable:
+		var slot_indices: Array = range(cards.size())
+		_shuffle(slot_indices)
 		for j in range(remaining_types.size()):
-			var slot = slot_indices[j]
-			cards[slot].type = remaining_types[j]
+			cards[slot_indices[j]].type = remaining_types[j]
 
-	# Re-render (nodes were cleared inside generate or we clear here for fallback)
-	# Note: generate_solvable_layout already set types but did not touch nodes.
-	# We still need to clear old nodes and re-render.
 	for c in cards:
 		if c.node and is_instance_valid(c.node):
 			c.node.queue_free()
 		c.node = null
 	render_cards()
 
-	remaining_tiles = remaining_types.size()
-	message_label.text = _t("msg_shuffled")
-	message_label.visible = true
-	_shuffle_message_showing = true
+	remaining_tiles = remaining_types.size() + _slot_tile_count()
 	update_ui()
 	check_for_moves()
+	refresh_props_ui()
 
-	# Robust endgame handling (kept for safety): if still no immediate move after the
-	# above, do limited random re-shuffles (this path is now very unlikely).
-	var shuffle_attempts = 0
-	const MAX_SHUFFLE_ATTEMPTS = 8
-	while remaining_tiles > 0 and not has_possible_move() and shuffle_attempts < MAX_SHUFFLE_ATTEMPTS:
-		shuffle_attempts += 1
-		remaining_types.shuffle()
-		for c in cards:
-			c.type = -1
-			if c.node and is_instance_valid(c.node):
-				c.node.queue_free()
-			c.node = null
-		var slot_indices = range(cards.size())
-		slot_indices.shuffle()
-		for j in range(remaining_types.size()):
-			cards[slot_indices[j]].type = remaining_types[j]
-		render_cards()
-		remaining_tiles = remaining_types.size()
-		check_for_moves()
-
-	if used_solvable_shuffle:
-		message_label.text = _t("msg_shuffled_solvable")
-	elif shuffle_attempts > 0:
-		message_label.text = _t("msg_shuffled_auto")
+	_shuffle_message_showing = true
+	message_label.text = _t("msg_shuffled_solvable") if used_solvable else _t("msg_shuffled")
+	message_label.visible = true
 
 	await get_tree().create_timer(1.2).timeout
 	if _shuffle_message_showing:
@@ -923,92 +1539,121 @@ func _on_shuffle_pressed() -> void:
 		_shuffle_message_showing = false
 		message_label.visible = false
 
+
 func _on_restart_pressed() -> void:
-	start_level(level)
+	if is_daily:
+		start_daily()
+	else:
+		start_level(level)
 
 func _on_next_level() -> void:
 	win_panel.visible = false
+	if is_daily:
+		_hide_game_ui()
+		show_main_menu()
+		return
 	start_level(level + 1)
 
 func show_win() -> void:
 	timer_running = false
 	message_label.text = ""
+	message_label.visible = false
+	_clear_selection()
 
-	# 计算星级：基于通关用时和关卡难度
-	var pairs = (16 + (level - 1) * 5) / 2  # 本关牌对数
-	# 快速线：每对牌平均用时
-	var avg_secs_per_pair = elapsed_time / max(pairs, 1)
+	var pairs = max(level_total_cards / 2, 1)
+	var avg_secs_per_pair = elapsed_time / pairs
 	var stars := 1
 	if avg_secs_per_pair <= 3.5:
 		stars = 3
 	elif avg_secs_per_pair <= 7.0:
 		stars = 2
 
-	# 时间奖励分
 	var time_bonus = 0
 	if stars == 3:
 		time_bonus = int(200 * level - elapsed_time * 2)
 	elif stars == 2:
 		time_bonus = int(100 * level - elapsed_time)
 	time_bonus = max(time_bonus, 10 * level)
-
+	if is_daily:
+		time_bonus = max(int(time_bonus * 0.5), 10 * level)
 	score += time_bonus
+
+	# Persist first, so the panel can show the freshly updated records.
+	update_progress_on_complete()
 	update_ui()
 
-	# 更新胜利面板
 	var win_label = $UI/WinPanel/WinLabel
 	if win_label:
-		win_label.text = _t("win_title")
+		win_label.text = _t("daily_done") if is_daily else _t("win_title")
 		win_label.add_theme_color_override("font_color", COLOR_TEXT_GOLD)
-		win_label.add_theme_font_size_override("font_size", 52)
+		win_label.add_theme_font_size_override("font_size", 46)
 
-	# 清除旧的统计标签
 	for child in win_panel.get_children():
 		if child.name.begins_with("Stat_"):
 			child.queue_free()
 
-	# 星级 — centered HBoxContainer with individual star labels
-	var star_container = HBoxContainer.new()
-	star_container.name = "Stat_StarsContainer"
-	star_container.alignment = BoxContainer.ALIGNMENT_CENTER
-	star_container.size = Vector2(400, 60)
-	star_container.position = Vector2(120, 150)
-	for i in range(3):
-		var star_lbl = Label.new()
-		star_lbl.text = "⭐" if i < stars else "☆"
-		star_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		star_lbl.add_theme_font_size_override("font_size", 42)
-		star_lbl.size = Vector2(100, 56)
-		star_container.add_child(star_lbl)
-	win_panel.add_child(star_container)
+	var stats_y := 110
+	if not is_daily:
+		var star_container = HBoxContainer.new()
+		star_container.name = "Stat_StarsContainer"
+		star_container.alignment = BoxContainer.ALIGNMENT_CENTER
+		star_container.size = Vector2(400, 60)
+		star_container.position = Vector2(120, 108)
+		for i in range(3):
+			var star_lbl = Label.new()
+			star_lbl.text = "⭐" if i < stars else "☆"
+			star_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			star_lbl.add_theme_font_size_override("font_size", 42)
+			star_lbl.size = Vector2(100, 56)
+			star_container.add_child(star_lbl)
+		win_panel.add_child(star_container)
+		stats_y = 186
 
-	# 统计信息
 	var total_secs = int(elapsed_time)
 	var time_str = "%02d:%02d" % [total_secs / 60, total_secs % 60]
-	var stats = [
-		_t("win_level_done", [level]),
-		_t("win_time", [time_str]),
-		_t("win_score", [score, time_bonus]),
-	]
-	var stats_y = 225
+
+	var stats: Array = []
+	if is_daily:
+		stats.append(_t("daily_best", [daily_best]))
+		stats.append(_t("win_time", [time_str]))
+		stats.append(_t("win_score", [score, time_bonus]))
+		stats.append(_t("daily_streak", [daily_streak]))
+	else:
+		stats.append(_t("win_level_done", [level]))
+		stats.append(_t("win_time", [time_str]))
+		stats.append(_t("win_score", [score, time_bonus]))
+		if best_combo >= 2:
+			stats.append(_t("win_combo_best", [best_combo]))
+
 	for stat in stats:
 		var sl = Label.new()
 		sl.name = "Stat_%s" % stat
 		sl.text = stat
 		sl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		sl.position = Vector2(20, stats_y)
-		sl.size = Vector2(480, 30)
-		sl.add_theme_font_size_override("font_size", 20)
+		sl.size = Vector2(480, 34)
+		sl.add_theme_font_size_override("font_size", 24)
 		sl.add_theme_color_override("font_color", COLOR_TEXT_LIGHT)
 		win_panel.add_child(sl)
-		stats_y += 35
+		stats_y += 44
 
+	next_button.text = _t("btn_back") if is_daily else _t("btn_next")
+	$UI/WinPanel/NextButton.position = Vector2(170, 400)
+	for p in slot_panels:
+		p.visible = false
+	for b in [hint_btn, undo_btn, moveout_btn]:
+		if b and is_instance_valid(b):
+			b.visible = false
+	if combo_label and is_instance_valid(combo_label):
+		combo_label.visible = false
+	pause_button.visible = false
+	shuffle_button.visible = false
+	restart_button.visible = false
+	win_panel.move_to_front()
 	win_panel.visible = true
 
-	# Save progress
-	update_progress_on_complete()
+	print("%s cleared! Score: %d, Time: %s, Stars: %d, BestCombo: %d" % [run_label, score, time_str, stars, best_combo])
 
-	print("Level %d cleared! Score: %d, Time: %s, Stars: %d" % [level, score, time_str, stars])
 
 func _input(event: InputEvent) -> void:
 	# Card touch handled by Button.pressed signals (see _on_card_button_pressed).
@@ -1022,6 +1667,8 @@ func _input(event: InputEvent) -> void:
 			_on_resume_pressed()
 		elif settings_menu.visible:
 			_fade_out(settings_menu)
+		elif win_panel.visible:
+			pass
 		elif main_menu.visible:
 			pass  # do nothing — let user stay on main menu
 		else:
@@ -1215,18 +1862,40 @@ func _setup_main_menu():
 	# Start button
 	var start = Button.new()
 	start.text = _t("btn_start")
-	start.position = Vector2(40, 35)
-	start.size = Vector2(400, 80)
+	start.position = Vector2(40, 18)
+	start.size = Vector2(400, 78)
 	start.pressed.connect(_on_start_game_pressed)
 	_r_menu_start = start
 	_make_rounded_button(start, COLOR_BTN_GREEN, RADIUS_PILL)
 	btn_card.add_child(start)
 	start.name = "StartContinueBtn"
+	# Daily challenge button
+	var daily = Button.new()
+	daily.text = _t("btn_daily")
+	daily.position = Vector2(40, 106)
+	daily.size = Vector2(400, 66)
+	daily.pressed.connect(_on_daily_pressed)
+	_make_rounded_button(daily, COLOR_BTN_PURPLE, RADIUS_MEDIUM)
+	btn_card.add_child(daily)
+	daily_btn = daily
+
+	daily_badge = Label.new()
+	daily_badge.name = "DailyBadge"
+	daily_badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	daily_badge.position = Vector2(280, 0)
+	daily_badge.size = Vector2(104, 66)
+	daily_badge.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	daily_badge.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	daily_badge.add_theme_font_size_override("font_size", 20)
+	daily_badge.add_theme_color_override("font_color", COLOR_TEXT_LIGHT)
+	daily_badge.visible = false
+	daily.add_child(daily_badge)
+
 	# Settings button
 	var settings_btn = Button.new()
 	settings_btn.text = _t("btn_settings")
-	settings_btn.position = Vector2(40, 135)
-	settings_btn.size = Vector2(400, 70)
+	settings_btn.position = Vector2(40, 182)
+	settings_btn.size = Vector2(400, 66)
 	settings_btn.pressed.connect(_on_settings_pressed)
 	_r_menu_settings = settings_btn
 	_make_rounded_button(settings_btn, COLOR_BTN_BLUE, RADIUS_MEDIUM)
@@ -1235,8 +1904,8 @@ func _setup_main_menu():
 	# Quit button
 	var quit = Button.new()
 	quit.text = _t("btn_quit")
-	quit.position = Vector2(40, 225)
-	quit.size = Vector2(400, 70)
+	quit.position = Vector2(40, 258)
+	quit.size = Vector2(400, 66)
 	quit.pressed.connect(func(): get_tree().quit())
 	_r_menu_quit = quit
 	_make_rounded_button(quit, COLOR_BTN_RED, RADIUS_MEDIUM)
@@ -1244,8 +1913,8 @@ func _setup_main_menu():
 
 	# Version / About — subtle text link at bottom of card
 	var about_btn = Button.new()
-	about_btn.text = _t("btn_about")
-	about_btn.position = Vector2(140, 340)
+	about_btn.text = "%s · v%s" % [_t("btn_about"), VERSION]
+	about_btn.position = Vector2(140, 336)
 	about_btn.size = Vector2(200, 42)
 	about_btn.flat = true
 	about_btn.add_theme_font_size_override("font_size", 14)
@@ -1437,16 +2106,19 @@ func _hide_game_ui():
 	shuffle_button.visible = false
 	restart_button.visible = false
 	message_label.visible = false
-	selected1_label.visible = false
-	selected2_label.visible = false
-	$UI/Selected1Pill.visible = false
-	$UI/Selected2Pill.visible = false
 	$UI/LevelLabelPill.visible = false
 	$UI/ScoreLabelPill.visible = false
 	$UI/RemainingLabelPill.visible = false
 	win_panel.visible = false
 	$UI/TitleLabel.visible = false
 	settings_menu.visible = false
+	for p in slot_panels:
+		p.visible = false
+	for b in [hint_btn, undo_btn, moveout_btn]:
+		if b and is_instance_valid(b):
+			b.visible = false
+	if combo_label and is_instance_valid(combo_label):
+		combo_label.visible = false
 	timer_running = false
 	if timer_label:
 		timer_label.get_parent().visible = false
@@ -1464,6 +2136,13 @@ func _show_game_ui():
 	$UI/ScoreLabelPill.visible = true
 	$UI/RemainingLabelPill.visible = true
 	$UI/TitleLabel.visible = false
+	for p in slot_panels:
+		p.visible = true
+	for b in [hint_btn, undo_btn, moveout_btn]:
+		if b and is_instance_valid(b):
+			b.visible = true
+	refresh_props_ui()
+	update_slot_ui()
 	if timer_label:
 		timer_label.get_parent().visible = true
 	if bgm_player and bgm_player.stream and bgm_enabled and not bgm_player.playing:
@@ -1500,6 +2179,24 @@ func _on_start_game_pressed():
 	main_menu.visible = false
 	_show_level_select()
 
+func _on_daily_pressed():
+	_fade_out(main_menu, 0.22)
+	await get_tree().create_timer(0.16).timeout
+	main_menu.visible = false
+	_show_game_ui()
+	start_daily()
+
+
+func _refresh_daily_badge() -> void:
+	if daily_badge == null or not is_instance_valid(daily_badge):
+		return
+	if daily_streak > 0:
+		daily_badge.text = _t("lbl_streak", [daily_streak])
+		daily_badge.visible = true
+	else:
+		daily_badge.visible = false
+
+
 func _make_rounded_button(btn: Button, bg_color: Color, corner_radius: int = RADIUS_MEDIUM):
 	var normal = StyleBoxFlat.new()
 	normal.bg_color = bg_color
@@ -1524,8 +2221,15 @@ func _make_rounded_button(btn: Button, bg_color: Color, corner_radius: int = RAD
 	pressed.shadow_size = 2
 	btn.add_theme_stylebox_override("pressed", pressed)
 
+	var disabled = normal.duplicate()
+	disabled.bg_color = bg_color.darkened(0.45)
+	disabled.shadow_size = 0
+	disabled.shadow_offset = Vector2(0, 0)
+	btn.add_theme_stylebox_override("disabled", disabled)
+
 	btn.add_theme_font_size_override("font_size", 24)
 	btn.add_theme_color_override("font_color", COLOR_TEXT_LIGHT)
+	btn.add_theme_color_override("font_disabled_color", Color(1, 0.97, 0.92, 0.45))
 
 func _setup_about_dialog():
 	about_dialog = AcceptDialog.new()
@@ -1551,6 +2255,144 @@ func _setup_timer_label():
 	timer_label.add_theme_font_size_override("font_size", 28)
 	timer_label.add_theme_color_override("font_color", COLOR_TEXT_LIGHT)
 	timer_bg.add_child(timer_label)
+
+# ====================== v0.4 GAME UI: SLOTS / PROPS / COMBO ======================
+
+func _setup_slot_ui() -> void:
+	var box := 100
+	var gap := 20
+	var total := SLOT_COUNT * box + (SLOT_COUNT - 1) * gap
+	var x0 := (720 - total) / 2
+	var y := 758
+	for i in range(SLOT_COUNT):
+		var panel := Panel.new()
+		panel.name = "SlotPanel%d" % i
+		panel.size = Vector2(box, box)
+		panel.position = Vector2(x0 + i * (box + gap), y)
+		panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		var style := StyleBoxFlat.new()
+		style.bg_color = Color(COLOR_SURFACE_DARK.r, COLOR_SURFACE_DARK.g, COLOR_SURFACE_DARK.b, 0.42)
+		style.set_corner_radius_all(20)
+		style.border_width_left = 2
+		style.border_width_right = 2
+		style.border_width_top = 2
+		style.border_width_bottom = 2
+		style.border_color = Color(COLOR_SURFACE_DARK.r, COLOR_SURFACE_DARK.g, COLOR_SURFACE_DARK.b, 0.55)
+		panel.add_theme_stylebox_override("panel", style)
+
+		var hint := Label.new()
+		hint.name = "EmptyHint"
+		hint.text = "＋"
+		hint.set_anchors_preset(Control.PRESET_FULL_RECT)
+		hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		hint.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		hint.add_theme_font_size_override("font_size", 34)
+		hint.add_theme_color_override("font_color", Color(1, 0.95, 0.85, 0.22))
+		hint.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		panel.add_child(hint)
+
+		$UI.add_child(panel)
+		slot_panels.append(panel)
+		slot_buttons.append(null)
+
+
+func _create_slot_tile(t: int, i: int) -> Control:
+	if i < 0 or i >= slot_panels.size():
+		return null
+	var btn := Button.new()
+	btn.name = "SlotTile"
+	btn.flat = true
+	btn.focus_mode = Control.FOCUS_NONE
+	btn.position = Vector2(8, 8)
+	btn.size = Vector2(84, 84)
+	btn.pressed.connect(_on_slot_pressed.bind(i))
+	var icon := TextureRect.new()
+	icon.texture = icon_textures[t]
+	icon.position = Vector2(0, 0)
+	icon.size = Vector2(84, 84)
+	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	btn.add_child(icon)
+	slot_panels[i].add_child(btn)
+	slot_buttons[i] = btn
+	return btn
+
+
+func update_slot_ui() -> void:
+	if slot_panels.is_empty():
+		return
+	for i in range(SLOT_COUNT):
+		var btn = null
+		for child in slot_panels[i].get_children():
+			if child is Button:
+				btn = child
+		slot_buttons[i] = btn
+		var hint = slot_panels[i].get_node_or_null("EmptyHint")
+		if hint:
+			var empty = (i >= slot_tiles.size() or slot_tiles[i] == null)
+			hint.visible = empty
+		_highlight_slot(i, selected_slot == i)
+
+
+func _setup_props_ui() -> void:
+	var w := 176
+	var h := 64
+	var gap := 18
+	var total := 3 * w + 2 * gap
+	var x0 := (720 - total) / 2
+	var y := 886
+
+	hint_btn = Button.new()
+	hint_btn.position = Vector2(x0, y)
+	hint_btn.size = Vector2(w, h)
+	_make_rounded_button(hint_btn, COLOR_BTN_GREEN, RADIUS_MEDIUM)
+	hint_btn.add_theme_font_size_override("font_size", 24)
+	hint_btn.pressed.connect(_on_hint_pressed)
+	$UI.add_child(hint_btn)
+
+	undo_btn = Button.new()
+	undo_btn.position = Vector2(x0 + w + gap, y)
+	undo_btn.size = Vector2(w, h)
+	_make_rounded_button(undo_btn, COLOR_BTN_BLUE, RADIUS_MEDIUM)
+	undo_btn.add_theme_font_size_override("font_size", 24)
+	undo_btn.pressed.connect(_on_undo_pressed)
+	$UI.add_child(undo_btn)
+
+	moveout_btn = Button.new()
+	moveout_btn.position = Vector2(x0 + 2 * (w + gap), y)
+	moveout_btn.size = Vector2(w, h)
+	_make_rounded_button(moveout_btn, COLOR_BTN_ORANGE, RADIUS_MEDIUM)
+	moveout_btn.add_theme_font_size_override("font_size", 24)
+	moveout_btn.pressed.connect(_on_moveout_pressed)
+	$UI.add_child(moveout_btn)
+
+
+func refresh_props_ui() -> void:
+	if hint_btn and is_instance_valid(hint_btn):
+		hint_btn.text = "%s %d" % [_t("btn_hint"), hints_left]
+		hint_btn.disabled = hints_left <= 0
+	if undo_btn and is_instance_valid(undo_btn):
+		undo_btn.text = "%s %d" % [_t("btn_undo"), undos_left]
+		undo_btn.disabled = undos_left <= 0 or history.is_empty()
+	if moveout_btn and is_instance_valid(moveout_btn):
+		moveout_btn.text = "%s %d" % [_t("btn_moveout"), moveouts_left]
+		moveout_btn.disabled = moveouts_left <= 0
+
+
+func _setup_combo_label() -> void:
+	combo_label = Label.new()
+	combo_label.name = "ComboLabel"
+	combo_label.visible = false
+	combo_label.position = Vector2(0, 1000)
+	combo_label.size = Vector2(720, 58)
+	combo_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	combo_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	combo_label.add_theme_font_size_override("font_size", 40)
+	combo_label.add_theme_color_override("font_color", COLOR_TEXT_GOLD)
+	combo_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.55))
+	combo_label.add_theme_constant_override("outline_size", 6)
+	$UI.add_child(combo_label)
+
 
 func _on_about_pressed():
 	about_dialog.title = _t("about_title")
@@ -1754,7 +2596,7 @@ func _refresh_language() -> void:
 	if _r_menu_start:     _r_menu_start.text = _t("btn_continue") if max_level > 1 else _t("btn_start")
 	if _r_menu_settings:  _r_menu_settings.text = _t("btn_settings")
 	if _r_menu_quit:      _r_menu_quit.text = _t("btn_quit")
-	if _r_menu_about:     _r_menu_about.text = _t("btn_about")
+	if _r_menu_about:     _r_menu_about.text = "%s · v%s" % [_t("btn_about"), VERSION]
 
 	# Settings menu
 	if _r_settings_title:     _r_settings_title.text = _t("settings_title")
@@ -1775,9 +2617,26 @@ func _refresh_language() -> void:
 	if level_select and level_select.visible:
 		_show_level_select()  # re-runs stars/text updates with _t()
 
+	# v0.4 widgets
+	if daily_btn and is_instance_valid(daily_btn):
+		daily_btn.text = _t("btn_daily")
+	if hint_btn and is_instance_valid(hint_btn):
+		hint_btn.text = "%s %d" % [_t("btn_hint"), hints_left]
+	if undo_btn and is_instance_valid(undo_btn):
+		undo_btn.text = "%s %d" % [_t("btn_undo"), undos_left]
+	if moveout_btn and is_instance_valid(moveout_btn):
+		moveout_btn.text = "%s %d" % [_t("btn_moveout"), moveouts_left]
+	refresh_props_ui()
+	_refresh_daily_badge()
+	if combo_label and is_instance_valid(combo_label):
+		combo_label.visible = false
+
 	# Game HUD (re-call update functions which use _t())
+	if is_daily:
+		run_label = _t("daily_title")
+	else:
+		run_label = _t("lbl_level", [level])
 	update_ui()
-	update_selected_ui()
 	_update_timer_display()
 
 	# About dialog
@@ -1811,6 +2670,10 @@ func save_player_data():
 	config.set_value("settings", "volume", bgm_volume)
 	config.set_value("settings", "bgm_enabled", bgm_enabled)
 	config.set_value("settings", "lang", current_lang)
+	config.set_value("daily", "last_played", daily_last_played)
+	config.set_value("daily", "best", daily_best)
+	config.set_value("daily", "streak", daily_streak)
+	config.set_value("meta", "schema", 2)
 	config.save("user://player_data.cfg")
 
 func load_player_data():
@@ -1831,6 +2694,9 @@ func load_player_data():
 		bgm_volume = config.get_value("settings", "volume", 0.7)
 		bgm_enabled = config.get_value("settings", "bgm_enabled", true)
 		current_lang = config.get_value("settings", "lang", "zh_CN")
+		daily_last_played = config.get_value("daily", "last_played", "")
+		daily_best = config.get_value("daily", "best", 0)
+		daily_streak = config.get_value("daily", "streak", 0)
 	else:
 		# First time launch - profile creation will handle
 		pass
@@ -1975,6 +2841,10 @@ func show_main_menu():
 			child.text = _t("btn_continue") if max_level > 1 else _t("btn_start")
 			break
 
+	if daily_btn and is_instance_valid(daily_btn):
+		daily_btn.text = _t("btn_daily")
+	_refresh_daily_badge()
+
 func _find_or_create_player_info() -> Control:
 	# 查找已存在的 PlayerInfo
 	for child in main_menu.get_children():
@@ -2034,10 +2904,28 @@ func _find_or_create_player_info() -> Control:
 	main_menu.add_child(info)
 	return info
 
+func _yesterday_string() -> String:
+	return Time.get_date_string_from_unix_time(int(Time.get_unix_time_from_system()) - 86400)
+
+
 func update_progress_on_complete():
-	# Calculate stars for this level completion
-	var pairs = (16 + (level - 1) * 5) / 2
-	var avg_secs_per_pair = elapsed_time / max(pairs, 1)
+	if is_daily:
+		daily_best = max(daily_best, score)
+		var today := Time.get_date_string_from_system()
+		if daily_last_played != today:
+			if daily_last_played == _yesterday_string():
+				daily_streak += 1
+			else:
+				daily_streak = 1
+			daily_last_played = today
+		elif daily_streak <= 0:
+			daily_streak = 1
+		save_player_data()
+		return
+
+	# Calculate stars for this level completion (uses the real tile count, not a formula)
+	var pairs = max(level_total_cards / 2, 1)
+	var avg_secs_per_pair = elapsed_time / pairs
 	var stars := 1
 	if avg_secs_per_pair <= 3.5:
 		stars = 3
