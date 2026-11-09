@@ -22,3 +22,6 @@ Thumbs.db
 
 # Godot import metadata for repo doc images
 /screenshot_*.png.import
+
+# Android build output
+/build/
