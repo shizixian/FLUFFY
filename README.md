@@ -51,6 +51,7 @@ godot --path .
 ### Tests
 
 ```bash
+godot --headless --path . --import          # first run only (builds the import cache)
 godot --headless --path . --script res://tests/run_tests.gd
 ```
 
