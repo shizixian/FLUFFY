@@ -19,3 +19,6 @@ Thumbs.db
 *.iml
 .idea/
 .vscode/
+
+# Godot import metadata for repo doc images
+/screenshot_*.png.import
