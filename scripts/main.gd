@@ -301,13 +301,22 @@ func _add_pill_behind(label_node: Label, extra_padding: Vector2 = Vector2(24, 10
 	label_node.get_parent().add_child(pill)
 	label_node.get_parent().move_child(pill, label_node.get_index())
 
+func _can_fade(ctrl) -> bool:
+	# CanvasLayer has no modulate — fading it would spam "property does not exist".
+	return ctrl is Control
+
 func _fade_in(ctrl, dur: float = 0.2) -> void:
-	ctrl.modulate.a = 0.0
 	ctrl.visible = true
+	if not _can_fade(ctrl):
+		return
+	ctrl.modulate.a = 0.0
 	var t = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	t.tween_property(ctrl, "modulate:a", 1.0, dur)
 
 func _fade_out(ctrl, dur: float = 0.15) -> void:
+	if not _can_fade(ctrl):
+		ctrl.visible = false
+		return
 	var t = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
 	t.tween_property(ctrl, "modulate:a", 0.0, dur)
 	t.tween_callback(func(): ctrl.visible = false)
