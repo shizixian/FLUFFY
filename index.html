@@ -330,6 +330,20 @@ footer .heart { color: var(--tile-pink); }
 .reveal.d1 { transition-delay: .08s; }
 .reveal.d2 { transition-delay: .16s; }
 .reveal.d3 { transition-delay: .24s; }
+/* ═══ 响应式修正：必须排在基础规则之后，否则会被同优先级的 .hero-grid 覆盖 ═══ */
+@media (max-width: 900px) {
+  .hero-grid { grid-template-columns: 1fr; gap: 56px; }
+  .hero { padding: 130px 0 90px; }
+  .ft-1, .ft-2 { display: none; }
+}
+@media (max-width: 760px) {
+  .nav-links { display: none; }
+  .strip-grid { grid-template-columns: repeat(2, 1fr); gap: 18px 0; }
+}
+@media (max-width: 600px) {
+  .feature-grid { grid-template-columns: 1fr; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .reveal, .hero-in, .float-tile, .phone { animation: none !important; transition: none !important; opacity: 1 !important; transform: none !important; }
 }
