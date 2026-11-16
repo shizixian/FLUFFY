@@ -8,6 +8,7 @@
 - **官网**：https://fluffy-idj.pages.dev （Cloudflare Pages，仓库根目录 `index.html`，手动部署）
 - **引擎**：Godot 4.6.3 / GDScript
 - **分辨率**：720×1280 竖屏基准，`canvas_items` + `expand`，长屏/平板/桌面自动适配
+- **渲染**：Compatibility（GLES3）+ `low_processor_mode`，画面不动时不重绘
 - **包名**：`com.shizixian.fluffy`（Android）
 
 ## v1.0 相对 v0.4 的变化
@@ -34,6 +35,17 @@ v1.0 是整体重写，旧版 3000 行的单文件 `main.gd` 拆成了下面的�
 - 每日挑战的「今日最佳」以前跨天不清零，现在按日期分开记录（`daily.best_date`）。
 - 弹窗不再硬编码 720×1280 坐标，横屏/平板不会错位。
 - 只修复了这一个记录 bug，存档本身完全兼容：v0.4 的 `user://player_data.cfg` 键名全部保留，新增 `sfx_volume / sfx_enabled / vibrate / level_best / best_date`，schema 升到 3。
+
+## 真机测试（2026-11-16，华为 P40 / ANA-AN00，Android 10，1080×2340）
+
+已验证：安装和首次启动、个人档案、触摸选牌、配对、点被压住的牌、返回键暂停、切后台后暂停、完整通关、震动、刘海和挖孔避让，日志里没有游戏报错。
+
+真机上发现并修复的问题：
+- **震动无效**：导出配置缺少 VIBRATE 权限（日志报 SecurityException）。
+- **待机耗电高**：游戏内待机 CPU 约 75%，降到约 14%。做法是换成 Compatibility 渲染器、开启低功耗模式，并把背景云朵改为静止——在 Godot 里画面上有任何一处在动都会触发整屏重绘，仅云朵漂移一项就占了约 20%。
+- **长屏封面被放大裁切**：比 9:16 更长的屏幕改为按宽度贴顶显示。
+- **长屏棋盘偏小**：最大放大倍数从 1.3 提到 1.6。
+- **切后台不暂停**：增加了对 `NOTIFICATION_APPLICATION_PAUSED` 的处理。
 
 ## 代码结构
 
@@ -77,7 +89,7 @@ UI 测试和截图脚本都使用独立的存档文件，不会动到真实存�
 ## 已知问题 / 后续可做
 
 - 退出时 Godot 会报一条 `ObjectDB instances leaked at exit`（一个音效对象），只出现在关闭程序时，不影响游戏。
-- 发布 APK 仍需手动导出（`export_presets.cfg` 含签名信息，在 .gitignore 里）。
+- 发布 APK 仍需手动导出。`export_presets.cfg` 含签名密码，在 .gitignore 里，不进仓库；换电脑导出时注意：v1.0 的配置是 1.0.0 / versionCode 6、`permissions/vibrate=true`、只打 arm64，签名证书和 v0.4 相同，可以覆盖升级。
 - 官网 `index.html` 文案和截图已更新到 v1.0，但 Cloudflare Pages 需要手动部署才会生效。
 - 每日挑战没有排行榜和分享图。
 - 背景音乐 `assets/bgm.ogg` 沿用旧版。

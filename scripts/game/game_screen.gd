@@ -381,7 +381,7 @@ func _fit_board() -> void:
 		first = false
 	r = r.grow(8)
 	var avail := _board_area.size - Vector2(8, 24)
-	var s := minf(minf(avail.x / r.size.x, avail.y / r.size.y), 1.3)
+	var s := minf(minf(avail.x / r.size.x, avail.y / r.size.y), 1.6)
 	_tiles_root.scale = Vector2(s, s)
 	_tiles_root.position = _board_area.size / 2.0 - r.get_center() * s
 
@@ -1113,5 +1113,5 @@ func handle_back() -> bool:
 
 func _notification(what: int) -> void:
 	# Leaving the app mid-level pauses it.
-	if what == NOTIFICATION_APPLICATION_FOCUS_OUT and _can_play():
+	if (what == NOTIFICATION_APPLICATION_FOCUS_OUT or what == NOTIFICATION_APPLICATION_PAUSED) and _can_play():
 		_open_pause()

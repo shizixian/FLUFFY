@@ -16,6 +16,7 @@ var _cover: TextureRect
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	resized.connect(_fit_cover)
 	_build()
 	I18n.changed.connect(_rebuild)
 
@@ -26,18 +27,27 @@ func _rebuild() -> void:
 	_build(false)
 
 
+## Phones taller than the 9:16 art get it fitted to the width and pinned to the
+## top (cropping the sides would blow the logo up); wider screens fill and crop.
+func _fit_cover() -> void:
+	if _cover == null or not is_instance_valid(_cover):
+		return
+	var art := Vector2(720, 1280)
+	if size.y / maxf(size.x, 1.0) > art.y / art.x:
+		_cover.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
+		_cover.offset_bottom = size.x * art.y / art.x
+	else:
+		_cover.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+
+
 func _build(animate := true) -> void:
 	_cover = TextureRect.new()
 	_cover.texture = load("res://assets/cover.jpg")
 	_cover.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	_cover.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
-	_cover.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_cover.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_cover)
-	_cover.resized.connect(func(): _cover.pivot_offset = _cover.size * Vector2(0.5, 0.35))
-	var breathe: Tween = _cover.create_tween().set_loops()
-	breathe.tween_property(_cover, "scale", Vector2(1.05, 1.05), 9.0).set_trans(Tween.TRANS_SINE)
-	breathe.tween_property(_cover, "scale", Vector2.ONE, 9.0).set_trans(Tween.TRANS_SINE)
+	_fit_cover()
 
 	# Fade the lower half of the art into a warm cream so the buttons read cleanly.
 	var shade := TextureRect.new()

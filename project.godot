@@ -18,9 +18,11 @@ config/name="FLUFFY羊羊乐"
 config/description="FLUFFY羊羊乐 - 叠叠乐配对消除 - 道具 / 连击 / 每日挑战"
 config/version="1.0.0"
 run/main_scene="res://scenes/main.tscn"
-config/features=PackedStringArray("4.6", "Forward Plus")
-config/icon="res://assets/game_icon.jpg"
 config/quit_on_go_back=false
+run/low_processor_mode=true
+run/low_processor_mode_sleep_usec=16000
+config/features=PackedStringArray("4.6", "GL Compatibility")
+config/icon="res://assets/game_icon.jpg"
 
 [autoload]
 
@@ -55,6 +57,9 @@ export/export_project=true
 common/enable_pause_aware_picking=true
 
 [rendering]
+
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
 
 textures/vram_compression/import_etc2_astc=true
 environment/defaults/default_clear_color=Color(0.95, 0.9, 0.85, 1)

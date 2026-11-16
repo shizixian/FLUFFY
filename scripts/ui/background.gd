@@ -1,5 +1,7 @@
 extends Control
-## Soft meadow backdrop: warm sky gradient, drifting clouds, rolling hills.
+## Soft meadow backdrop: warm sky gradient, clouds, rolling hills.
+## Static on purpose: any moving pixel makes Godot repaint the whole screen,
+## and on a phone drifting clouds alone tripled idle CPU (13% → 33%).
 
 const SKY_TOP := Color("fff3dc")
 const SKY_BOTTOM := Color("f3f7dc")
@@ -13,6 +15,7 @@ var _clouds: Array = []
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	resized.connect(queue_redraw)
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 7
 	for i in 5:
@@ -20,12 +23,6 @@ func _ready() -> void:
 			"x": rng.randf(), "y": rng.randf_range(0.04, 0.5),
 			"s": rng.randf_range(0.7, 1.3), "v": rng.randf_range(0.004, 0.012),
 		})
-
-
-func _process(delta: float) -> void:
-	_t += delta
-	if is_visible_in_tree():
-		queue_redraw()
 
 
 func _draw() -> void:
