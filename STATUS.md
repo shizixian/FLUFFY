@@ -1,93 +1,95 @@
 # FLUFFY羊羊乐 — 项目状态
 
-> 最后更新：2026-11-09 · 版本 **v0.4.0**
+> 最后更新：2026-11-16 · 版本 **v1.0.0**
 
 ## 项目信息
 
 - **仓库**：https://github.com/shizixian/FLUFFY
-- **官网**：https://fluffy-idj.pages.dev （Cloudflare Pages，仓库根目录 `index.html` 静态托管）
+- **官网**：https://fluffy-idj.pages.dev （Cloudflare Pages，仓库根目录 `index.html`，手动部署）
 - **引擎**：Godot 4.6.3 / GDScript
-- **分辨率**：720×1280 竖屏，`canvas_items` 拉伸
+- **分辨率**：720×1280 竖屏基准，`canvas_items` + `expand`，长屏/平板/桌面自动适配
+- **渲染**：Compatibility（GLES3）+ `low_processor_mode`，画面不动时不重绘
 - **包名**：`com.shizixian.fluffy`（Android）
 
-## v0.4.0 做了什么
+## v1.0 相对 v0.4 的变化
 
-### 1. 道具系统（每关各 3 次，重开关卡即重置）
+v1.0 是整体重写，旧版 3000 行的单文件 `main.gd` 拆成了下面的模块结构。
 
-| 道具 | 行为 | 实现要点 |
-|---|---|---|
-| 提示 | 高亮一对可消的牌（也支持「槽位牌 + 棋盘牌」组合） | `_find_hint_pair()` 优先找棋盘上两张可点的同类牌 |
-| 撤销 | 回退上一步：消除、移出、槽位消除都能撤 | `history` 栈记录 `match / board_slot / slot_move / slot_pair` 四种动作 |
-| 移出 | 把选中的牌暂存到槽位（共 3 格） | 牌离开棋盘但**不计入已消除**，仍占用「剩余」 |
+### 玩法
+- **真正的叠层**：上层牌错开半格摆放，只要有上层牌和它重叠，这张牌就被压住（旧版只判断正上方同一格）。被压住的牌会变暗；清掉上层后它会轻轻跳一下，提示现在可以点了。
+- **11 种布局**，最大 78 张、4 层；牌面从 6 种扩到 12 种，关卡越往后种类越多。第 12 关起，最大的 4 种布局轮换出现（部分镜像）。
+- **生成必有解**：从完整棋盘出发模拟一遍通关——每次取两张"此刻可点"的牌赋予同一图案后移除；把这个移除顺序倒过来，就是一条合法的通关路线。洗牌用同一算法，暂存区里的单张也会被考虑进去。
+- **道具**：提示 3 / 撤销 3 / 移出 3 / 洗牌 2（旧版洗牌不限次）。没有可配对的牌、道具也用完时，弹出「无路可走」面板（旧版不会失败）。
+- 撤销会把「移出后自动配对」连同那次移出一起撤回。
+- 星级：平均每对 ≤4 秒三星，≤8 秒两星（旧版是 3.5 / 7 秒）。
+- 前两关玩家停顿 9 秒会自动闪一下可消的对子；前三关显示操作提示。
 
-槽位规则：槽内出现两张同类牌自动消除；槽位牌也可以与棋盘上同类的可点牌配对。
+### 表现
+- 牌面改为矢量 SVG（`assets/tiles/`，128px 视框，2 倍分辨率导入），UI 图标在 `assets/ui/`。
+- 牌在代码里绘制：投影、侧面厚度、选中时抬起并加金边、被压时加暗层。
+- 动画：开局发牌、配对的两张牌飞到一起后爆开、得分飘字、连击大字和倒计时条、通关彩带、星星逐个落下、分数滚动增加。
+- 音效全部在运行时合成（`scripts/autoload/sound.gd`），不依赖音频文件；分成 Music / SFX 两条总线。手机上配对成功会震动。
+- 主菜单沿用原封面图，去掉了重复的标题框；头像缩成圆形，不再遮挡封面上的 Logo。
 
-### 2. 连击计分
+### 修复的旧问题
+- 每日挑战的「今日最佳」以前跨天不清零，现在按日期分开记录（`daily.best_date`）。
+- 弹窗不再硬编码 720×1280 坐标，横屏/平板不会错位。
+- 只修复了这一个记录 bug，存档本身完全兼容：v0.4 的 `user://player_data.cfg` 键名全部保留，新增 `sfx_volume / sfx_enabled / vibrate / level_best / best_date`，schema 升到 3。
 
-3 秒内连续消除累计连击，每级 +50%，上限 4 级（最高 3×）。基础分仍为 `10 + 关卡×2`，最高连击会在通关面板里显示。
+## 真机测试（2026-11-16，华为 P40 / ANA-AN00，Android 10，1080×2340）
 
-### 3. 每日挑战
+已验证：安装和首次启动、个人档案、触摸选牌、配对、点被压住的牌、返回键暂停、切后台后暂停、完整通关、震动、刘海和挖孔避让，日志里没有游戏报错。
 
-- 主菜单新增入口，每天一副**固定牌面**（种子 = 当天日期字符串的 hash），同一日期所有人牌面一致。
-- 独立记录：今日最佳分、连续打卡天数（跨天判定用「昨天」字符串比较），存于 `user://player_data.cfg` 的 `[daily]` 段。
-- 可重复挑战，只记录最佳成绩，同一天重复不会增加连续天数。
-
-### 4. 多套关卡布局
-
-`LAYOUT_DEFS` 定义 5 种棋盘形状，按「能装下本关牌数的最小棋盘」选择，牌数随关卡单调不降：
-
-| 布局 | 槽位数 |
-|---|---|
-| diamond | 24 |
-| pyramid | 28 |
-| wide | 30 |
-| classic | 32 |
-| towers | 36 |
-
-因此 1–3 关是菱形小盘，4 关金字塔，5 关宽盘，6 关经典盘，7 关起进入 36 格双塔盘。关卡牌数公式仍为 `16 + (关卡-1)×4`。
-
-### 5. 发牌算法重写（重要）
-
-旧版是「随机贪心 + 最多 120 次重试」，失败后降级成随机摆放（**可能不可解**）。v0.4 改为可证明正确的构造：
-
-1. 先用水填法给每个格子分配「本局用几层」，保证工作量始终摊在多个格子上；
-2. 每次挑剩余配额最大的两个**不同**格子，按从底层到顶层的顺序成对放置；
-3. 反向回放放置顺序就是一条合法通关路径（轮到某对牌时，所有可能压住它的牌都已取走）。
-
-它不再需要重试，也不会产生不可解牌面。洗牌沿用同一算法（槽位里只剩单张时，那张牌会被放在最后一步、位于顶层）。
+真机上发现并修复的问题：
+- **震动无效**：导出配置缺少 VIBRATE 权限（日志报 SecurityException）。
+- **待机耗电高**：游戏内待机 CPU 约 75%，降到约 14%。做法是换成 Compatibility 渲染器、开启低功耗模式，并把背景云朵改为静止——在 Godot 里画面上有任何一处在动都会触发整屏重绘，仅云朵漂移一项就占了约 20%。
+- **长屏封面被放大裁切**：比 9:16 更长的屏幕改为按宽度贴顶显示。
+- **长屏棋盘偏小**：最大放大倍数从 1.3 提到 1.6。
+- **切后台不暂停**：增加了对 `NOTIFICATION_APPLICATION_PAUSED` 的处理。
 
 ## 代码结构
 
 ```
-scripts/main.gd        核心逻辑 + 全部 UI（单文件，约 3000 行）
-scenes/main.tscn       主场景（Board / UI / 菜单挂载点）
-tests/run_tests.gd     headless 回归测试（143 项）
-assets/icons/          6 个牌面图标（jpg，白底）
-assets/bgm.ogg         背景音乐
-index.html             官网落地页
-docs/                  Play Console 草稿等归档文档
+scripts/main.gd                 根节点：背景、切换界面、全局弹窗、返回键
+scripts/core/layouts.gd         布局定义 + 关卡难度曲线（纯数据）
+scripts/core/game_state.gd      规则：可点判定、配对、暂存区、道具、连击、撤销、洗牌、生成器（无节点）
+scripts/autoload/save.gd        存档（兼容 v0.4）
+scripts/autoload/i18n.gd        三语文案
+scripts/autoload/sound.gd       BGM + 合成音效 + 震动
+scripts/game/game_screen.gd     一局游戏：HUD、棋盘、点击、动画、通关/卡死弹窗
+scripts/game/tile_view.gd       单张牌的绘制
+scripts/game/burst.gd           粒子（星星、彩带）
+scripts/ui/kit.gd               配色、字体、糖果按钮、通用样式
+scripts/ui/modal.gd             弹窗基类
+scripts/ui/dialogs.gd           设置 / 关于 / 个人档案
+scripts/ui/main_menu.gd         主菜单
+scripts/ui/level_select.gd      关卡选择
+scripts/ui/{background,bar,star_row,switch}.gd  小组件
+tests/run_tests.gd              逻辑测试（headless）
+tests/ui_smoke.tscn             UI 冒烟测试（headless，驱动真实界面）
+tests/shot_runner.tscn          全界面截图
 ```
 
-`main.gd` 里的分区顺序：本地化文案 → UI 样式助手 → 布局定义 → 状态变量 → 开局/发牌 → 牌节点渲染 → 点击与匹配 → 槽位 → 道具 → 洗牌 → 菜单 → 存档。
+规则逻辑和界面完全分离：`GameState` 不依赖任何节点，测试直接驱动它；`GameScreen` 只负责把状态变化做成动画。
 
 ## 开发与测试
 
 ```bash
-# 跑游戏
-godot --path .
-
-# 逻辑回归（不需要显示器）
-godot --headless --path . --script res://tests/run_tests.gd
+godot --path .                                                  # 运行
+godot --headless --path . --import                              # 新克隆后先导入一次
+godot --headless --path . --script res://tests/run_tests.gd     # 2235 项检查
+godot --headless --path . res://tests/ui_smoke.tscn             # UI 全流程
+godot --path . --resolution 360x640 res://tests/shot_runner.tscn -- out=/tmp/fluffy_shots vp=720x1280
 ```
 
-测试覆盖：5 种布局无重槽、1–60 关发牌可解性回放、牌型偶数配平、连击递增、提示扣次、撤销还原、移出不计消除、槽位配对、洗牌保留槽位、每日种子确定性、1/3/5/9 关完整自动通关、难度曲线单调。
+逻辑测试覆盖：布局无同层重叠且数量为偶数、40 关 × 25 种子共 1000 局全部可解、每日牌面确定性、部分遮挡判定、非法配对、连击倍率与上限、移出/自动配对/撤销联动、槽位配对、洗牌保持牌型且仍可解、卡死判定、星级、v0.4 存档迁移、每日连续天数跨月跨年。
+
+UI 测试和截图脚本都使用独立的存档文件，不会动到真实存档。
 
 ## 已知问题 / 后续可做
 
-- 通关面板、暂停面板、设置面板都是硬编码 720×1280 坐标，横屏或平板上会错位（未处理）。
-- 牌面图标是白底 jpg，靠圆角卡底遮住边缘；换成透明 PNG 会更干净。
-- `project.godot` 里 `config/version` 已改为 0.4.0，但发布 APK 仍需手动导出（`export_presets.cfg` 未入库）。
-- APK 已改为**仅 arm64**、不含 gradle 模板，v0.4.0 体积 28 MB（旧版 171 MB）。`export_presets.cfg` 含签名信息，仍在 .gitignore 里。
-- 每日挑战目前只有「最佳分 / 连击天数」，没有排行榜或分享图。
-- 官网（Cloudflare Pages）是手动部署的，push 到 main 不会自动发布；仓库里只保留页面源码。
-- 撤销栈不设上限，理论上可一路退回开局。
+- 退出时 Godot 会报一条 `ObjectDB instances leaked at exit`（一个音效对象），只出现在关闭程序时，不影响游戏。
+- 发布 APK 仍需手动导出。`export_presets.cfg` 含签名密码，在 .gitignore 里，不进仓库；换电脑导出时注意：v1.0 的配置是 1.0.0 / versionCode 6、`permissions/vibrate=true`、只打 arm64，签名证书和 v0.4 相同，可以覆盖升级。
+- 官网 `index.html` 文案和截图已更新到 v1.0，但 Cloudflare Pages 需要手动部署才会生效。
+- 每日挑战没有排行榜和分享图。
+- 背景音乐 `assets/bgm.ogg` 沿用旧版。

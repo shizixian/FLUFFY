@@ -15,23 +15,29 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 [application]
 
 config/name="FLUFFY羊羊乐"
-config/description="FLUFFY羊羊乐 - 经典羊羊乐消除小游戏 - 道具 / 连击 / 每日挑战"
-config/version="0.4.0"
+config/description="FLUFFY羊羊乐 - 叠叠乐配对消除 - 道具 / 连击 / 每日挑战"
+config/version="1.0.0"
 run/main_scene="res://scenes/main.tscn"
-config/features=PackedStringArray("4.6", "Forward Plus")
+config/quit_on_go_back=false
+run/low_processor_mode=true
+run/low_processor_mode_sleep_usec=16000
+config/features=PackedStringArray("4.6", "GL Compatibility")
 config/icon="res://assets/game_icon.jpg"
 
-[debug]
+[autoload]
 
-settings/stdout/verbose_stdout=true
+Save="*res://scripts/autoload/save.gd"
+I18n="*res://scripts/autoload/i18n.gd"
+Sound="*res://scripts/autoload/sound.gd"
 
 [display]
 
 window/size/viewport_width=720
 window/size/viewport_height=1280
-window/size/mode=2
+window/size/window_width_override=450
+window/size/window_height_override=800
 window/stretch/mode="canvas_items"
-window/stretch/aspect="keep_width"
+window/stretch/aspect="expand"
 window/handheld/orientation=1
 
 [editor_plugins]
@@ -42,15 +48,6 @@ enabled=PackedStringArray()
 
 theme/default_font_multichannel_signed_distance_field=true
 
-[input]
-
-select={
-"deadzone": 0.5,
-"events": [Object(InputEventMouseButton,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"button_mask":0,"position":Vector2(0, 0),"global_position":Vector2(0, 0),"factor":1.0,"button_index":1,"canceled":false,"pressed":true,"double_click":false,"script":null)
-, Object(InputEventScreenTouch,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"index":0,"position":Vector2(0, 0),"canceled":false,"pressed":true,"double_tap":false,"script":null)
-]
-}
-
 [mobile]
 
 export/export_project=true
@@ -60,6 +57,9 @@ export/export_project=true
 common/enable_pause_aware_picking=true
 
 [rendering]
+
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
 
 textures/vram_compression/import_etc2_astc=true
 environment/defaults/default_clear_color=Color(0.95, 0.9, 0.85, 1)
