@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>FLUFFY 🐑 可爱消除小游戏 | Cute Matching Puzzle</title>
-<meta name="description" content="FLUFFY 是一款可爱休闲的消消乐小游戏：点开未遮挡的牌，找出两张相同的，清空棋盘获胜。提示/撤销/移出三件道具、连击加分、每日挑战，免费无广告，离线畅玩，支持中英繁三种语言。">
+<meta name="description" content="FLUFFY 是一款可爱休闲的消消乐小游戏：点开未遮挡的牌，找出两张相同的，清空棋盘获胜。提示/撤销/移出/洗牌四件道具、连击加分、每日挑战，免费无广告，离线畅玩，支持中英繁三种语言。">
 <meta property="og:title" content="FLUFFY — 可爱消除小游戏">
 <meta property="og:description" content="Match, Clear, and Relax 🐑 道具、连击、每日挑战，免费无广告的可爱消除游戏，Android 下载。">
 <meta property="og:type" content="website">
@@ -429,7 +429,7 @@ footer .heart { color: var(--tile-pink); }
         <span class="num">1</span>
         <div class="emoji">👆</div>
         <h3 data-i18n="play-s1-t">点开未遮挡的牌</h3>
-        <p data-i18n="play-s1-p">只有没被压住的牌才能点开，选牌前先观察整个棋盘。</p>
+        <p data-i18n="play-s1-p">牌错开半格层层叠放，被压住的牌会变暗 —— 先清上层，再挖下层。</p>
       </div>
       <div class="step reveal d2">
         <span class="num">2</span>
@@ -455,12 +455,12 @@ footer .heart { color: var(--tile-pink); }
       <p data-i18n="feat-sub">简单易上手，进阶有挑战 —— 完美的五分钟放松。</p>
     </div>
     <div class="feature-grid">
-      <div class="feature reveal"><span class="f-emoji">📈</span><h3 data-i18n="feat-1-t">渐进式难度</h3><p data-i18n="feat-1-p">五套棋盘形状轮换，牌数和图案种类随关卡增长，越往后越需要动脑。</p></div>
-      <div class="feature reveal d1"><span class="f-emoji">🎁</span><h3 data-i18n="feat-2-t">三件道具</h3><p data-i18n="feat-2-p">提示高亮一对可消的牌，撤销回退上一步，移出把牌暂存到槽位 —— 每关各三次。</p></div>
+      <div class="feature reveal"><span class="f-emoji">📈</span><h3 data-i18n="feat-1-t">渐进式难度</h3><p data-i18n="feat-1-p">11 种棋盘、最多 4 层 78 张牌、12 种图案，越往后越需要动脑。</p></div>
+      <div class="feature reveal d1"><span class="f-emoji">🎁</span><h3 data-i18n="feat-2-t">四件道具</h3><p data-i18n="feat-2-p">提示、撤销、移出到暂存区各 3 次，洗牌 2 次 —— 卡住时用来破局，用完就要靠真本事。</p></div>
       <div class="feature reveal d2"><span class="f-emoji">🔥</span><h3 data-i18n="feat-3-t">连击加分</h3><p data-i18n="feat-3-p">3 秒内连续消除累积连击，最高 3 倍分数，手越快分越高。</p></div>
       <div class="feature reveal"><span class="f-emoji">📅</span><h3 data-i18n="feat-4-t">每日挑战</h3><p data-i18n="feat-4-p">每天一副固定牌面，记录今日最佳与连续打卡天数，和昨天的自己比一比。</p></div>
-      <div class="feature reveal d1"><span class="f-emoji">✅</span><h3 data-i18n="feat-5-t">每局保证可解</h3><p data-i18n="feat-5-p">棋盘由自底向上的成对构造生成，一定能清空 —— 没有死局，只有纯粹的快乐。</p></div>
-      <div class="feature reveal d2"><span class="f-emoji">⭐</span><h3 data-i18n="feat-6-t">三星评价</h3><p data-i18n="feat-6-p">每对牌 3.5 秒内消除拿满三星，重玩关卡挑战自己的最佳时间。</p></div>
+      <div class="feature reveal d1"><span class="f-emoji">✅</span><h3 data-i18n="feat-5-t">每局保证可解</h3><p data-i18n="feat-5-p">每副牌都按一条真实的通关路线生成，一定存在解法 —— 能不能找到，就看你了。</p></div>
+      <div class="feature reveal d2"><span class="f-emoji">⭐</span><h3 data-i18n="feat-6-t">三星评价</h3><p data-i18n="feat-6-p">平均每对 4 秒内消除拿满三星，每关记录最佳分数，重玩刷新纪录。</p></div>
       <div class="feature reveal"><span class="f-emoji">🌍</span><h3 data-i18n="feat-7-t">三种语言</h3><p data-i18n="feat-7-p">简体中文、繁体中文、English，随时在设置里一键切换。</p></div>
       <div class="feature reveal d1"><span class="f-emoji">✈️</span><h3 data-i18n="feat-8-t">离线畅玩</h3><p data-i18n="feat-8-p">无需网络。地铁上、飞机上，想玩就玩。</p></div>
     </div>
@@ -527,21 +527,21 @@ footer .heart { color: var(--tile-pink); }
       "strip-lang": "简体 / 繁體 / English", "strip-stars": "每日挑战",
       "strip-solvable": "每局保证可解", "strip-free": "免费无广告",
       "play-title": "三步上手", "play-sub": "规则简单到一看就会，玩起来却停不下来。",
-      "play-s1-t": "点开未遮挡的牌", "play-s1-p": "只有没被压住的牌才能点开，选牌前先观察整个棋盘。",
+      "play-s1-t": "点开未遮挡的牌", "play-s1-p": "牌错开半格层层叠放，被压住的牌会变暗 —— 先清上层，再挖下层。",
       "play-s2-t": "找出两张相同", "play-s2-p": "选中两张相同的牌即可消除，配错也没关系，换一对再试。",
       "play-s3-t": "清空棋盘获胜", "play-s3-p": "越快清空星级越高，重玩关卡刷新你的最佳纪录。",
       "feat-title": "为什么你会爱上它", "feat-sub": "简单易上手，进阶有挑战 —— 完美的五分钟放松。",
-      "feat-1-t": "渐进式难度", "feat-1-p": "五套棋盘形状轮换，牌数和图案种类随关卡增长，越往后越需要动脑。",
-      "feat-2-t": "三件道具", "feat-2-p": "提示高亮一对可消的牌，撤销回退上一步，移出把牌暂存到槽位 —— 每关各三次。",
+      "feat-1-t": "渐进式难度", "feat-1-p": "11 种棋盘、最多 4 层 78 张牌、12 种图案，越往后越需要动脑。",
+      "feat-2-t": "四件道具", "feat-2-p": "提示、撤销、移出到暂存区各 3 次，洗牌 2 次 —— 卡住时用来破局，用完就要靠真本事。",
       "feat-3-t": "连击加分", "feat-3-p": "3 秒内连续消除累积连击，最高 3 倍分数，手越快分越高。",
       "feat-4-t": "每日挑战", "feat-4-p": "每天一副固定牌面，记录今日最佳与连续打卡天数，和昨天的自己比一比。",
-      "feat-5-t": "每局保证可解", "feat-5-p": "棋盘由自底向上的成对构造生成，一定能清空 —— 没有死局，只有纯粹的快乐。",
-      "feat-6-t": "三星评价", "feat-6-p": "每对牌 3.5 秒内消除拿满三星，重玩关卡挑战自己的最佳时间。",
+      "feat-5-t": "每局保证可解", "feat-5-p": "每副牌都按一条真实的通关路线生成，一定存在解法 —— 能不能找到，就看你了。",
+      "feat-6-t": "三星评价", "feat-6-p": "平均每对 4 秒内消除拿满三星，每关记录最佳分数，重玩刷新纪录。",
       "feat-7-t": "三种语言", "feat-7-p": "简体中文、繁体中文、English，随时在设置里一键切换。",
       "feat-8-t": "离线畅玩", "feat-8-p": "无需网络。地铁上、飞机上，想玩就玩。",
       "shots-title": "看看它有多可爱", "shots-sub": "温暖、精致、软萌 —— 为手机竖屏而生。",
       "shots-1-cap": "主菜单", "shots-1-sub": "选头像、看星级、开始消除",
-      "shots-2-cap": "游戏画面", "shots-2-sub": "层叠棋盘 + 道具 + 槽位 + 连击",
+      "shots-2-cap": "游戏画面", "shots-2-sub": "错位叠层 + 暂存区 + 道具 + 连击",
       "cta-title": "准备好开玩了吗？", "cta-sub": "下载 FLUFFY，开始消除吧。免费、无广告、只有好心情。",
       "cta-btn": "立即获取 FLUFFY",
       "cta-hint-1": "Android 手机可直接安装 APK ·", "cta-hint-2": "查看全部版本",
@@ -558,21 +558,21 @@ footer .heart { color: var(--tile-pink); }
       "strip-lang": "3 Languages", "strip-stars": "Star Rating System",
       "strip-solvable": "Always Solvable", "strip-free": "Free, No Ads",
       "play-title": "Three Steps to Play", "play-sub": "Simple to learn, tricky to master — the perfect 5-minute break.",
-      "play-s1-t": "Tap Uncovered Tiles", "play-s1-p": "Only tiles that aren't blocked can be selected — scan the board before you choose.",
+      "play-s1-t": "Tap Uncovered Tiles", "play-s1-p": "Tiles stack half a tile apart; covered ones are dimmed. Clear the top layers to dig deeper.",
       "play-s2-t": "Match Two of a Kind", "play-s2-p": "Pick two identical tiles to eliminate them. Wrong match? Just try another pair.",
       "play-s3-t": "Clear the Board", "play-s3-p": "Faster clears earn more stars. Replay levels to beat your best time.",
       "feat-title": "Why You'll Love It", "feat-sub": "Simple to learn, tricky to master — the perfect 5-minute break.",
-      "feat-1-t": "Progressive Difficulty", "feat-1-p": "Five board shapes rotate as you level up, with more tiles and more patterns — never unfair, just smarter.",
-      "feat-2-t": "Three Props", "feat-2-p": "Hint highlights a matchable pair, Undo rewinds your last move, Move parks a tile in a slot — three charges each per level.",
+      "feat-1-t": "Progressive Difficulty", "feat-1-p": "11 board shapes, up to 78 tiles in 4 layers and 12 tile designs — it gets smarter as you go.",
+      "feat-2-t": "Four Power-ups", "feat-2-p": "Hint, Undo and Park (3 each) plus Shuffle (2) to break a dead end — run out and it's all you.",
       "feat-3-t": "Combo Scoring", "feat-3-p": "Chain clears within 3 seconds to build a combo for up to 3× points. The faster you play, the higher you score.",
       "feat-4-t": "Daily Challenge", "feat-4-p": "One fixed board every day, with today's best score and a streak to keep alive. Beat yesterday's you.",
-      "feat-5-t": "Always Solvable", "feat-5-p": "Boards are built bottom-up from matched pairs, so every deal can be cleared. No dead ends — just pure matching fun.",
-      "feat-6-t": "Star Ratings", "feat-6-p": "Clear each level fast to earn up to 3 stars. Replay to beat your best time and max out your score.",
+      "feat-5-t": "Always Solvable", "feat-5-p": "Every board is generated from a real winning route, so a solution always exists. Finding it is up to you.",
+      "feat-6-t": "Star Ratings", "feat-6-p": "Average 4 seconds a pair for 3 stars. Each level keeps your best score — replay to beat it.",
       "feat-7-t": "3 Languages", "feat-7-p": "Simplified Chinese, Traditional Chinese, English — switch anytime from the settings menu.",
       "feat-8-t": "Offline Play", "feat-8-p": "No internet needed. Play on the subway, on a plane, or wherever you want a quick mental break.",
       "shots-title": "See It in Action", "shots-sub": "Warm, polished, and adorable — made for your phone.",
       "shots-1-cap": "Main Menu", "shots-1-sub": "Pick an avatar, check your stars, start matching",
-      "shots-2-cap": "Gameplay", "shots-2-sub": "Stacked board + props + slots + combos",
+      "shots-2-cap": "Gameplay", "shots-2-sub": "Offset stacks + tray + power-ups + combos",
       "cta-title": "Ready to Match?", "cta-sub": "Download FLUFFY and start clearing tiles. Free, no ads, just good vibes.",
       "cta-btn": "Get FLUFFY Now",
       "cta-hint-1": "Install the APK directly on Android ·", "cta-hint-2": "All releases",
