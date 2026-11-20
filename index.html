@@ -198,17 +198,20 @@ h1 .hl { color: var(--accent-deep); }
 }
 
 /* 漂浮方块 */
+/* Same look as the in-game tiles: cream face, brown outline, a "thickness" edge. */
 .float-tile {
   position: absolute; z-index: 3; display: flex; align-items: center; justify-content: center;
-  width: 54px; height: 54px; border-radius: 14px; font-size: 26px;
-  box-shadow: 0 10px 24px rgba(74, 48, 40, 0.22);
+  width: 58px; height: 64px; border-radius: 14px;
+  background: #fffaf0; border: 3px solid #8d6a55;
+  box-shadow: 0 6px 0 #e9cfa6, 0 6px 0 3px #8d6a55, 0 16px 26px rgba(74, 48, 40, 0.28);
   animation: floaty 7s ease-in-out infinite;
 }
-.ft-1 { top: 6%; right: 4%;  background: var(--tile-pink);   animation-delay: 0s; }
-.ft-2 { top: 26%; right: -3%; background: var(--tile-indigo); animation-delay: -2.2s; }
-.ft-3 { bottom: 22%; right: 2%; background: var(--tile-green); animation-delay: -4.1s; }
-.ft-4 { bottom: 8%; right: 14%; background: var(--tile-orange); animation-delay: -1.4s; }
-.ft-5 { top: 40%; right: 10%; background: var(--accent); animation-delay: -5.6s; width: 42px; height: 42px; font-size: 20px; border-radius: 12px; }
+.float-tile img { width: 80%; height: auto; display: block; pointer-events: none; }
+.ft-1 { top: 6%; right: 4%;  animation-delay: 0s; }
+.ft-2 { top: 26%; right: 1%; animation-delay: -2.2s; }
+.ft-3 { bottom: 22%; right: 2%; animation-delay: -4.1s; }
+.ft-4 { bottom: 8%; right: 14%; animation-delay: -1.4s; }
+.ft-5 { top: 40%; right: 10%; animation-delay: -5.6s; width: 46px; height: 50px; border-radius: 12px; }
 @keyframes floaty {
   0%, 100% { transform: translateY(0) rotate(-6deg); }
   50%      { transform: translateY(-16px) rotate(7deg); }
@@ -373,11 +376,11 @@ footer .heart { color: var(--tile-pink); }
 <section class="hero" id="top">
   <div class="hero-blob blob-a"></div>
   <div class="hero-blob blob-b"></div>
-  <div class="float-tile ft-1">🍓</div>
-  <div class="float-tile ft-2">🍋</div>
-  <div class="float-tile ft-3">🍇</div>
-  <div class="float-tile ft-4">🐑</div>
-  <div class="float-tile ft-5">⭐</div>
+  <div class="float-tile ft-1"><img src="assets/tiles/apple.svg" alt=""></div>
+  <div class="float-tile ft-2"><img src="assets/tiles/carrot.svg" alt=""></div>
+  <div class="float-tile ft-3"><img src="assets/tiles/grapes.svg" alt=""></div>
+  <div class="float-tile ft-4"><img src="assets/tiles/sheep.svg" alt=""></div>
+  <div class="float-tile ft-5"><img src="assets/tiles/sun.svg" alt=""></div>
   <div class="container hero-grid">
     <div>
       <p class="eyebrow hero-in d1">🐑 <span data-i18n="hero-eyebrow">可爱休闲 · 消消乐</span></p>
