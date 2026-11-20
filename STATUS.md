@@ -5,7 +5,14 @@
 ## 项目信息
 
 - **仓库**：https://github.com/shizixian/FLUFFY
-- **官网**：https://fluffy-idj.pages.dev （Cloudflare Pages，仓库根目录 `index.html`，手动部署）
+- **官网**：https://fluffy-idj.pages.dev （Cloudflare Pages 项目 `fluffy`，直传、不连 Git，生产分支 `main`）
+  部署时只上传网站用到的文件，**不要上传整个仓库**（仓库里的 `export_presets.cfg` 含签名密码）：
+  ```bash
+  rm -rf build/site && mkdir -p build/site/assets/tiles
+  cp index.html icon.svg screenshot_*_small.png build/site/
+  cp assets/tiles/{apple,carrot,grapes,sheep,sun}.svg build/site/assets/tiles/
+  wrangler pages deploy build/site --project-name fluffy --branch main
+  ```
 - **引擎**：Godot 4.6.3 / GDScript
 - **分辨率**：720×1280 竖屏基准，`canvas_items` + `expand`，长屏/平板/桌面自动适配
 - **渲染**：Compatibility（GLES3）+ `low_processor_mode`，画面不动时不重绘
@@ -90,6 +97,6 @@ UI 测试和截图脚本都使用独立的存档文件，不会动到真实存�
 
 - 退出时 Godot 会报一条 `ObjectDB instances leaked at exit`（一个音效对象），只出现在关闭程序时，不影响游戏。
 - 发布 APK 仍需手动导出。`export_presets.cfg` 含签名密码，在 .gitignore 里，不进仓库；换电脑导出时注意：v1.0 的配置是 1.0.0 / versionCode 6、`permissions/vibrate=true`、只打 arm64，签名证书和 v0.4 相同，可以覆盖升级。
-- 官网 `index.html` 文案和截图已更新到 v1.0，但 Cloudflare Pages 需要手动部署才会生效。
+- 官网已于 2026-11-20 部署 v1.0 版本。
 - 每日挑战没有排行榜和分享图。
 - 背景音乐 `assets/bgm.ogg` 沿用旧版。
